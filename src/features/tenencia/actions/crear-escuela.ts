@@ -3,6 +3,7 @@
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
+import { leerPlantilla, PLANTILLA_POR_DEFECTO } from '../lib/plantillas'
 import { crearEscuelaSchema } from '../schemas/escuela'
 import { estadoInicial, type EstadoFormulario } from './tipos'
 
@@ -42,7 +43,7 @@ export async function crearEscuela(
   const datos = analisis.data
   const supabase = await crearClienteServidor()
 
-  const { error } = await supabase.rpc('crear_escuela', {
+  const { data: escuelaId, error } = await supabase.rpc('crear_escuela', {
     p_slug: datos.slug,
     p_nombre: datos.nombre,
     p_pais: datos.pais,
@@ -67,5 +68,40 @@ export async function crearEscuela(
     }
   }
 
+  await clonarPlantilla(supabase, escuelaId as string)
+
   redirect(`/${datos.slug}`)
+}
+
+/**
+ * Clona la plantilla base en la escuela recien creada.
+ *
+ * Ahora mismo solo las comisiones: epocas, festividades, tramos de aporte y
+ * minuta cuelgan de un ano escolar, y el ano se crea en la Fase 1. La
+ * plantilla ya los trae y esa fase los materializa.
+ *
+ * Es el mejor esfuerzo, no un paso critico. Si falla, la escuela ya existe y
+ * su administracion puede crear las comisiones a mano; abortar aqui dejaria a
+ * la persona sin poder reintentar, porque el slug ya estaria tomado.
+ */
+async function clonarPlantilla(
+  supabase: Awaited<ReturnType<typeof crearClienteServidor>>,
+  escuelaId: string,
+) {
+  try {
+    const plantilla = await leerPlantilla(PLANTILLA_POR_DEFECTO)
+
+    if (plantilla.comisiones.length === 0) return
+
+    await supabase.from('comisiones').insert(
+      plantilla.comisiones.map((comision) => ({
+        escuela_id: escuelaId,
+        nombre: comision.nombre,
+        descripcion: comision.descripcion ?? null,
+      })),
+    )
+  } catch {
+    // Sin datos de la escuela en el log (docs/PRIVACY.md).
+    console.warn('No se pudo clonar la plantilla base en el alta de escuela')
+  }
 }

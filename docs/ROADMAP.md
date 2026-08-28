@@ -13,15 +13,21 @@ llegue la fase 2, las maestras ya están dentro del sistema por el calendario.
 
 ## Fase 0 — Cimientos
 
-- [ ] Migración `0001_tenencia` aplicada y verificada con las tres consultas de
-      `tenancy-guard`
-- [ ] Test de aislamiento entre dos escuelas pasando
-- [ ] Auth con email y contraseña (nada de OAuth todavía)
-- [ ] Onboarding de escuela: crear tenant, primer administrador, clonar plantilla
-- [ ] Tokens de diseño Waldorf en `src/shared/design/waldorf.ts`
-- [ ] Layout base con la escuela en la ruta y selector para quien pertenece a varias
+- [x] Migración `0001_tenencia` aplicada y verificada con las tres consultas de
+      `tenancy-guard` — las tres devuelven cero filas
+- [x] Test de aislamiento entre dos escuelas pasando — `tests/aislamiento.spec.ts`
+- [x] Auth con email y contraseña (nada de OAuth todavía)
+- [x] Onboarding de escuela: crear tenant, primer administrador, clonar plantilla
+      — la clonación cubre hoy las comisiones; épocas, festividades, tramos y minuta
+      cuelgan de un año escolar y se materializan en la Fase 1
+- [x] Tokens de diseño Waldorf en `src/shared/design/waldorf.ts`
+- [x] Layout base con la escuela en la ruta y selector para quien pertenece a varias
 
 Criterio de salida: dos escuelas coexisten en la base y ninguna ve datos de la otra.
+
+**Cumplido el 2026-08-28.** Además se corrigieron cuatro defectos bloqueantes de las
+migraciones antes del primer `db push`; ver
+`.claude/memory/project/correcciones-migraciones-iniciales.md`.
 
 ## Fase 1 — Ritmo
 

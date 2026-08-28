@@ -1,0 +1,81 @@
+{
+  "id": "kimun-cl",
+  "nombre": "Escuela Waldorf chilena (hemisferio sur)",
+  "descripcion": "Plantilla base modelada sobre la Escuela Waldorf Kimun, Algarrobo. Una escuela nueva la clona en el onboarding y la ajusta. Nada de esto es constante en el codigo: ver CLAUDE.md, regla 6.",
+  "pais": "CL",
+  "hemisferio": "sur",
+  "idioma": "es",
+  "moneda": "CLP",
+
+  "comisiones": [
+    { "nombre": "Economia", "descripcion": "Aportes, presupuesto y proyeccion." },
+    { "nombre": "Huerto", "descripcion": "Huerta, compost y ciclo de la tierra." },
+    { "nombre": "Construccion", "descripcion": "Mantencion y obras de la escuela." },
+    { "nombre": "Festividades", "descripcion": "Preparacion de las fiestas del ano." },
+    { "nombre": "Cultura", "descripcion": "Talleres, biblioteca y vida cultural." }
+  ],
+
+  "epocas": [
+    { "orden": 1, "nombre": "Numeros y ritmo", "semanas": 4 },
+    { "orden": 2, "nombre": "Lengua materna", "semanas": 4 },
+    { "orden": 3, "nombre": "Formas", "semanas": 3 },
+    { "orden": 4, "nombre": "Naturaleza", "semanas": 4 },
+    { "orden": 5, "nombre": "Historias y leyendas", "semanas": 4 },
+    { "orden": 6, "nombre": "Medida y proporcion", "semanas": 3 }
+  ],
+
+  "festividades": [
+    {
+      "nombre": "Fiesta de la primavera",
+      "mes": 9,
+      "dia": 21,
+      "descripcion": "Equinoccio de primavera en el hemisferio sur."
+    },
+    {
+      "nombre": "San Miguel",
+      "mes": 9,
+      "dia": 29,
+      "descripcion": "El valor y la fuerza interior. Cae en primavera en el sur."
+    },
+    {
+      "nombre": "Martinmas",
+      "mes": 11,
+      "dia": 11,
+      "descripcion": "Fiesta de los faroles y de la luz que se comparte."
+    },
+    {
+      "nombre": "Adviento",
+      "mes": 12,
+      "dia": 1,
+      "descripcion": "Espiral de adviento. En el sur cae en verano."
+    },
+    {
+      "nombre": "San Juan",
+      "mes": 6,
+      "dia": 24,
+      "descripcion": "Fuego de invierno en el hemisferio sur. En Europa es fiesta de verano: por esto el hemisferio es un dato de la escuela y no una constante."
+    },
+    {
+      "nombre": "Pascua de Resurreccion",
+      "mes": 4,
+      "dia": 5,
+      "descripcion": "Fecha movil. Se ajusta cada ano al calendario."
+    }
+  ],
+
+  "tramos_aporte": [
+    { "orden": 1, "nombre": "Tramo A", "monto_sugerido": 60000, "horas_sugeridas": 4 },
+    { "orden": 2, "nombre": "Tramo B", "monto_sugerido": 95000, "horas_sugeridas": 4 },
+    { "orden": 3, "nombre": "Tramo C", "monto_sugerido": 130000, "horas_sugeridas": 4 },
+    { "orden": 4, "nombre": "Tramo D", "monto_sugerido": 175000, "horas_sugeridas": 4 },
+    { "orden": 5, "nombre": "Aporte solidario", "monto_sugerido": 220000, "horas_sugeridas": 4 }
+  ],
+
+  "minuta": [
+    { "dia_semana": 1, "plato": "Arroz", "notas": "Lunes, cereal del dia: arroz." },
+    { "dia_semana": 2, "plato": "Legumbres", "notas": "Martes." },
+    { "dia_semana": 3, "plato": "Mijo", "notas": "Miercoles." },
+    { "dia_semana": 4, "plato": "Centeno", "notas": "Jueves." },
+    { "dia_semana": 5, "plato": "Avena", "notas": "Viernes." }
+  ]
+}

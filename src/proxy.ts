@@ -1,11 +1,15 @@
 import { createServerClient, type SetAllCookies } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import type { Database } from '@/shared/supabase/tipos'
 
 /**
  * Refresco de sesion y guardia de rutas.
  *
- * La plantilla SaaS Factory no traia middleware: sin el, el token de Supabase
- * caduca en los Server Components y no hay nada que proteja `/[slug]`.
+ * La plantilla SaaS Factory no traia nada de esto: sin ello el token de
+ * Supabase caduca en los Server Components y nada protege `/[slug]`.
+ *
+ * Se llama `proxy.ts` y no `middleware.ts`: Next.js 16 deprecio esa
+ * convencion y avisa en cada arranque del servidor de desarrollo.
  *
  * Aqui solo se comprueba que HAYA sesion. La comprobacion de MEMBRESIA (que
  * esta persona pertenezca a esta escuela) vive en el layout de `[slug]`,
@@ -20,10 +24,10 @@ function esPublica(ruta: string) {
   return PUBLICAS.some((p) => ruta === p || ruta.startsWith(`${p}/`))
 }
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   let respuesta = NextResponse.next({ request })
 
-  const supabase = createServerClient(
+  const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {

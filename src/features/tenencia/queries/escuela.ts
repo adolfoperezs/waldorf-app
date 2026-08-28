@@ -1,5 +1,6 @@
 import 'server-only'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
+import type { Database } from '@/shared/supabase/tipos'
 
 /**
  * Consultas de tenencia.
@@ -11,24 +12,16 @@ import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
  * indistinguibles a proposito.
  */
 
-export type Escuela = {
-  id: string
-  slug: string
-  nombre: string
-  pais: string
-  zona_horaria: string
-  idioma: string
-  moneda: string
-  hemisferio: 'norte' | 'sur'
-}
+// Tipos generados desde el esquema, nunca escritos a mano (CLAUDE.md, regla 4).
+// Se regeneran con `npm run db:tipos`.
+type FilaEscuela = Database['public']['Tables']['escuelas']['Row']
 
-export type Rol =
-  | 'administracion'
-  | 'colegio_maestros'
-  | 'maestro_guia'
-  | 'maestro_especialidad'
-  | 'comision'
-  | 'familia'
+/** Solo las columnas que la interfaz necesita, derivadas del esquema. */
+export type Escuela = Pick<
+  FilaEscuela,
+  'id' | 'slug' | 'nombre' | 'pais' | 'zona_horaria' | 'idioma' | 'moneda' | 'hemisferio'
+>
+export type Rol = Database['public']['Enums']['rol_escuela']
 
 /**
  * Escuela por slug, o null si el usuario no puede verla.
@@ -46,7 +39,7 @@ export async function escuelaPorSlug(slug: string): Promise<Escuela | null> {
     .eq('slug', slug)
     .maybeSingle()
 
-  return (data as Escuela | null) ?? null
+  return data ?? null
 }
 
 /** Escuelas donde la persona tiene membresia vigente, para el selector. */
@@ -71,5 +64,5 @@ export async function misRoles(escuelaId: string): Promise<Rol[]> {
     .eq('escuela_id', escuelaId)
     .eq('activa', true)
 
-  return (data ?? []).map((fila) => fila.rol as Rol)
+  return (data ?? []).map((fila) => fila.rol)
 }
