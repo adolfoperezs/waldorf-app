@@ -65,8 +65,8 @@ create trigger anios_updated_at before update on public.anios_escolares
 create table public.epocas (
   id          uuid primary key default gen_random_uuid(),
   escuela_id  uuid not null references public.escuelas(id) on delete cascade,
-  anio_id     uuid not null references public.anios_escolares(id) on delete cascade,
-  grupo_id    uuid references public.grupos(id) on delete cascade,
+  anio_id     uuid not null,
+  grupo_id    uuid,
   nombre      text not null,
   tema        text,
   orden       int  not null default 1,
@@ -90,6 +90,17 @@ alter table public.epocas
   )
   where (grupo_id is not null);
 
+-- H9: la constraint de arriba solo cubre epocas de grupo. Dos epocas de
+-- toda la escuela tambien deben excluirse entre si, o el calendario queda
+-- ambiguo para los grupos que las heredan.
+alter table public.epocas
+  add constraint epocas_escuela_sin_solape
+  exclude using gist (
+    escuela_id with =,
+    daterange(inicio, fin, '[]') with &&
+  )
+  where (grupo_id is null);
+
 create index epocas_anio_idx on public.epocas (anio_id, inicio);
 
 create trigger epocas_updated_at before update on public.epocas
@@ -103,8 +114,8 @@ create trigger epocas_updated_at before update on public.epocas
 create table public.festividades (
   id           uuid primary key default gen_random_uuid(),
   escuela_id   uuid not null references public.escuelas(id) on delete cascade,
-  anio_id      uuid not null references public.anios_escolares(id) on delete cascade,
-  epoca_id     uuid references public.epocas(id) on delete set null,
+  anio_id      uuid not null,
+  epoca_id     uuid,
   nombre       text not null,
   descripcion  text,
   fecha        date not null,
@@ -135,9 +146,9 @@ create type public.tipo_evento as enum (
 create table public.eventos (
   id             uuid primary key default gen_random_uuid(),
   escuela_id     uuid not null references public.escuelas(id) on delete cascade,
-  anio_id        uuid references public.anios_escolares(id) on delete cascade,
-  epoca_id       uuid references public.epocas(id) on delete set null,
-  grupo_id       uuid references public.grupos(id) on delete set null,
+  anio_id        uuid,
+  epoca_id       uuid,
+  grupo_id       uuid,
   tipo           public.tipo_evento not null,
   titulo         text not null,
   descripcion    text,
@@ -164,7 +175,7 @@ create trigger eventos_updated_at before update on public.eventos
 create table public.evento_inscripciones (
   id          uuid primary key default gen_random_uuid(),
   escuela_id  uuid not null references public.escuelas(id) on delete cascade,
-  evento_id   uuid not null references public.eventos(id) on delete cascade,
+  evento_id   uuid not null,
   perfil_id   uuid not null references public.perfiles(id) on delete cascade,
   asistio     boolean,
   created_at  timestamptz not null default now(),
@@ -179,7 +190,7 @@ create table public.evento_inscripciones (
 create table public.minutas (
   id          uuid primary key default gen_random_uuid(),
   escuela_id  uuid not null references public.escuelas(id) on delete cascade,
-  epoca_id    uuid not null references public.epocas(id) on delete cascade,
+  epoca_id    uuid not null,
   dia_semana  int not null check (dia_semana between 1 and 7),
   plato       text not null,
   notas       text,
@@ -193,6 +204,59 @@ comment on table public.minutas is
 
 create trigger minutas_updated_at before update on public.minutas
   for each row execute function app.set_updated_at();
+
+
+-- =====================================================================
+-- Integridad multi-tenant (B3)
+--
+-- La RLS filtra por escuela_id, pero NO valida que las llaves foraneas
+-- apunten a filas de la misma escuela. Sin esto una fila puede declarar
+-- escuela_id = A y colgar de un padre de la escuela B: el aislamiento lo
+-- hace Postgres (CLAUDE.md, regla 3) y aqui no lo estaba haciendo.
+--
+-- Patron: unique (id, escuela_id) en el padre, FK compuesta en la hija.
+-- Vuelve el cruce estructuralmente imposible, no solo improbable.
+--
+-- En las FK opcionales se usa `on delete set null (columna)` (Postgres 15+)
+-- para anular solo la columna del padre y no escuela_id, que es not null.
+-- =====================================================================
+
+alter table public.grupos
+  add constraint grupos_id_escuela_key unique (id, escuela_id);
+alter table public.anios_escolares
+  add constraint anios_id_escuela_key unique (id, escuela_id);
+alter table public.epocas
+  add constraint epocas_id_escuela_key unique (id, escuela_id);
+alter table public.eventos
+  add constraint eventos_id_escuela_key unique (id, escuela_id);
+
+alter table public.epocas
+  add constraint epocas_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint epocas_grupo_fk foreign key (grupo_id, escuela_id)
+    references public.grupos (id, escuela_id) on delete cascade;
+
+alter table public.festividades
+  add constraint festividades_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint festividades_epoca_fk foreign key (epoca_id, escuela_id)
+    references public.epocas (id, escuela_id) on delete set null (epoca_id);
+
+alter table public.eventos
+  add constraint eventos_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint eventos_epoca_fk foreign key (epoca_id, escuela_id)
+    references public.epocas (id, escuela_id) on delete set null (epoca_id),
+  add constraint eventos_grupo_fk foreign key (grupo_id, escuela_id)
+    references public.grupos (id, escuela_id) on delete set null (grupo_id);
+
+alter table public.evento_inscripciones
+  add constraint evento_inscripciones_evento_fk foreign key (evento_id, escuela_id)
+    references public.eventos (id, escuela_id) on delete cascade;
+
+alter table public.minutas
+  add constraint minutas_epoca_fk foreign key (epoca_id, escuela_id)
+    references public.epocas (id, escuela_id) on delete cascade;
 
 
 -- =====================================================================
@@ -234,8 +298,33 @@ begin
 end $$;
 
 
+-- H6: `publico` no lo aplicaba nadie. La politica generada arriba deja que
+-- cualquier miembro vea los eventos internos del equipo. Se reemplaza.
+drop policy eventos_select on public.eventos;
+
+create policy eventos_select on public.eventos
+  for select to authenticated
+  using (app.es_miembro(escuela_id) and (publico or app.es_gestor(escuela_id)));
+
+
 -- Excepcion: cada persona gestiona su propia inscripcion a un evento.
 create policy evento_inscripciones_propia on public.evento_inscripciones
   for all to authenticated
   using (perfil_id = auth.uid() and app.es_miembro(escuela_id))
   with check (perfil_id = auth.uid() and app.es_miembro(escuela_id));
+
+
+-- H12 — Privilegios explicitos de tabla. La RLS decide fila por fila;
+-- esto es la capa anterior, que las migraciones daban por supuesta.
+do $$
+declare t text;
+begin
+  foreach t in array array[
+    'grupos','anios_escolares','epocas','festividades',
+    'eventos','evento_inscripciones','minutas'
+  ]
+  loop
+    execute format(
+      'grant select, insert, update, delete on public.%I to authenticated', t);
+  end loop;
+end $$;

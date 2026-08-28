@@ -238,8 +238,15 @@ declare
 begin
   v_fila := to_jsonb(coalesce(new, old));
 
+  -- La tabla escuelas no tiene columna escuela_id: su propio id es el tenant.
+  -- Sin este coalesce las filas de auditoria de escuelas quedaban con
+  -- escuela_id nulo, y auditoria_select (que exige not null) las volvia
+  -- invisibles para todo el mundo.
   begin
-    v_escuela := (v_fila ->> 'escuela_id')::uuid;
+    v_escuela := coalesce(
+      (v_fila ->> 'escuela_id')::uuid,
+      case when tg_table_name = 'escuelas' then (v_fila ->> 'id')::uuid end
+    );
   exception when others then
     v_escuela := null;
   end;
@@ -341,7 +348,24 @@ create policy auditoria_select on public.auditoria
   );
 
 
+-- auditoria: el titular ve su propia bitacora de datos personales.
+-- perfiles no tiene escuela_id (una persona puede estar en varias escuelas),
+-- asi que esas filas quedan con escuela_id nulo y sin esta politica nadie
+-- las veria. Cubre el derecho de acceso de docs/PRIVACY.md.
+create policy auditoria_select_propia on public.auditoria
+  for select to authenticated
+  using (
+    escuela_id is null
+    and tabla = 'public.perfiles'
+    and registro_id = auth.uid()
+  );
+
+
 -- Auditoria sobre la propia capa de tenencia.
+create trigger perfiles_auditoria
+  after insert or update or delete on public.perfiles
+  for each row execute function app.auditar('completo');
+
 create trigger membresias_auditoria
   after insert or update or delete on public.membresias
   for each row execute function app.auditar('completo');
@@ -376,3 +400,134 @@ $$;
 create trigger crear_perfil_al_registrar
   after insert on auth.users
   for each row execute function app.crear_perfil_al_registrar();
+
+
+-- ---------------------------------------------------------------------
+-- B1 + B2 — Alta de escuela y de su primer administrador
+--
+-- escuelas NO tiene politica de INSERT a proposito. Crear un tenant no es
+-- una escritura mas: es el unico momento en que hay que saltarse la RLS,
+-- porque el primer administrador todavia no tiene membresia que lo avale.
+--
+-- Sin esta funcion el sistema estaba muerto: sin politica de insert nadie
+-- podia crear una escuela, y membresias_admin exigia ser ya administracion
+-- de la escuela para insertar la primera membresia de administracion.
+--
+-- Las dos escrituras van en la misma transaccion: no puede existir una
+-- escuela sin administrador.
+-- ---------------------------------------------------------------------
+
+-- Vive en `public`, no en `app`, porque tiene que ser invocable via RPC:
+-- PostgREST solo expone el esquema public, y `app` esta revocado a proposito
+-- para que las funciones de seguridad no sean parte de la API.
+create or replace function public.crear_escuela(
+  p_slug         text,
+  p_nombre       text,
+  p_pais         char(2) default 'CL',
+  p_zona_horaria text    default 'America/Santiago',
+  p_idioma       text    default 'es',
+  p_moneda       char(3) default 'CLP',
+  p_hemisferio   text    default 'sur'
+)
+returns uuid
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+  v_actor   uuid := auth.uid();
+  v_escuela uuid;
+begin
+  if v_actor is null then
+    raise exception 'Se requiere una sesion iniciada para crear una escuela'
+      using errcode = '42501';
+  end if;
+
+  if not exists (select 1 from public.perfiles pe where pe.id = v_actor) then
+    raise exception 'El perfil del usuario no existe'
+      using errcode = '42501';
+  end if;
+
+  insert into public.escuelas (
+    slug, nombre, pais, zona_horaria, idioma, moneda, hemisferio
+  )
+  values (
+    lower(btrim(p_slug)), btrim(p_nombre), upper(p_pais), p_zona_horaria,
+    p_idioma, upper(p_moneda), p_hemisferio
+  )
+  returning id into v_escuela;
+
+  insert into public.membresias (escuela_id, perfil_id, rol)
+  values (v_escuela, v_actor, 'administracion');
+
+  return v_escuela;
+end;
+$$;
+
+-- Postgres otorga EXECUTE a PUBLIC por defecto en toda funcion nueva.
+-- Hay que revocarlo o `anon` podria crear escuelas sin sesion.
+revoke execute on function
+  public.crear_escuela(text, text, char, text, text, char, text)
+from public, anon;
+
+grant execute on function
+  public.crear_escuela(text, text, char, text, text, char, text)
+to authenticated;
+
+
+-- ---------------------------------------------------------------------
+-- H5 — Auditoria de LECTURAS
+--
+-- docs/PRIVACY.md exige auditar tambien las lecturas en los niveles Menor
+-- y Sensible. Postgres no dispara triggers en SELECT, asi que hace falta
+-- un registro explicito: toda query sobre ninos, observaciones o informes
+-- llama a esta funcion.
+--
+-- Solo metadatos: quien, cuando, sobre que registro. Nunca el contenido.
+-- Duplicar el dato sensible en la bitacora multiplica la exposicion en vez
+-- de reducirla.
+--
+-- Se queda en el esquema `app`, fuera de la API: si fuera invocable por RPC
+-- cualquiera podria ensuciar la bitacora con lecturas que nunca ocurrieron.
+-- En la Fase 2 las lecturas de ninos pasan por funciones RPC de `public` que
+-- consultan y registran en el mismo paso, y que llaman a esta por dentro.
+-- ---------------------------------------------------------------------
+
+create or replace function app.registrar_lectura(
+  p_tabla    text,
+  p_registro uuid,
+  p_escuela  uuid
+)
+returns void
+language sql
+security definer
+set search_path = ''
+as $$
+  insert into public.auditoria (
+    escuela_id, tabla, registro_id, operacion, actor
+  )
+  values (p_escuela, p_tabla, p_registro, 'SELECT', auth.uid());
+$$;
+
+revoke execute on function app.registrar_lectura(text, uuid, uuid)
+  from public, anon, authenticated;
+
+
+-- ---------------------------------------------------------------------
+-- H12 — Privilegios explicitos
+--
+-- Las migraciones revocaban de anon pero nunca otorgaban a authenticated:
+-- dependian de los privilegios por defecto de Supabase. Se hace explicito.
+-- La RLS sigue siendo quien decide fila por fila; esto es la capa de
+-- privilegios de tabla, que es anterior y distinta.
+--
+-- escuelas: sin insert (solo app.crear_escuela) y sin delete (cerrar una
+-- escuela es dar de baja, no borrar: hay obligaciones de conservacion).
+-- perfiles: sin insert (lo hace el trigger de auth) y sin delete.
+-- auditoria: solo lectura. Nadie escribe por API, solo los triggers.
+-- ---------------------------------------------------------------------
+
+grant select, update         on public.escuelas   to authenticated;
+grant select, update         on public.perfiles   to authenticated;
+grant select, insert, update, delete on public.membresias to authenticated;
+grant select                 on public.auditoria  to authenticated;

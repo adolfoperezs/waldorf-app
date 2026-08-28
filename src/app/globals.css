@@ -1,6 +1,134 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 /*
- * Personaliza tu tema aquí
- * Documentación: https://tailwindcss.com/docs/theme
+ * Sistema de diseno Waldorf
+ *
+ * Ninguno de los cinco design systems del SaaS Factory sirve: neobrutalism,
+ * neumorphism y liquid glass son lenguaje visual de startup y la comunidad
+ * Waldorf los lee como ajenos. Ver "Estetica" en docs/ARCHITECTURE.md.
+ *
+ * Base: la paleta del Welcome Kit de Kimun. Cremas, marrones calidos, tonos
+ * tierra. Serif para titulos. Mucho aire. Sin sombras duras ni gradientes.
+ *
+ * Tailwind v4 genera una variable CSS por cada token de este bloque, asi que
+ * `--color-tierra-500` existe en runtime y `bg-tierra-500` existe en utilidades.
+ * src/shared/design/waldorf.ts los re-exporta tipados para el JS que los
+ * necesite. Los valores se definen aqui una sola vez.
  */
+
+@theme {
+  /* --- Cremas: fondos. Es papel, no pantalla. --- */
+  --color-crema-50: #fbf7f0;
+  --color-crema-100: #f5eee2;
+  --color-crema-200: #ebe0ce;
+  --color-crema-300: #decfb6;
+
+  /* --- Tierra: texto, bordes y acento principal. --- */
+  --color-tierra-200: #d8c3a5;
+  --color-tierra-300: #c0a381;
+  --color-tierra-400: #a4835c;
+  --color-tierra-500: #876743;
+  --color-tierra-600: #6d5134;
+  --color-tierra-700: #533d27;
+  --color-tierra-800: #3a2b1b;
+  --color-tierra-900: #291e13;
+
+  /* --- Acentos naturales. Apagados a proposito. --- */
+  --color-salvia-300: #a8b79c;
+  --color-salvia-500: #6f8163;
+  --color-salvia-700: #4a5842;
+
+  --color-arcilla-300: #d9a08c;
+  --color-arcilla-500: #b0604a;
+  --color-arcilla-700: #7d4133;
+
+  --color-ocre-300: #e2c68a;
+  --color-ocre-500: #c0912f;
+  --color-ocre-700: #8a6620;
+
+  /*
+   * --- Semanticos ---
+   * En economia el tono importa: nunca rojo de alarma para un aporte
+   * pendiente. Un acuerdo por completar no es una deuda vencida.
+   */
+  --color-lienzo: var(--color-crema-50);
+  --color-superficie: #ffffff;
+  --color-borde: var(--color-crema-300);
+  --color-texto: var(--color-tierra-900);
+  --color-texto-suave: var(--color-tierra-600);
+  --color-acento: var(--color-tierra-500);
+  --color-exito: var(--color-salvia-500);
+  --color-atencion: var(--color-ocre-700);
+  --color-alerta: var(--color-arcilla-700);
+
+  /*
+   * --- Tipografia ---
+   * Serif para titulos, con fallback dentro del var(): si la webfont no
+   * carga, `var(--fuente-titulo)` sin fallback invalidaria la declaracion
+   * entera y el titulo saldria en sans.
+   *
+   * El cuerpo va en fuentes del sistema a proposito: una sola webfont en
+   * toda la app. El usuario tipico esta en un telefono de gama media con
+   * conexion irregular en la costa.
+   */
+  --font-titulo: var(--fuente-titulo, Georgia), Georgia, "Times New Roman", serif;
+  --font-cuerpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", sans-serif;
+
+  /* --- Formas: esquinas suaves, nada de cantos duros. --- */
+  --radius-suave: 0.5rem;
+  --radius-organico: 1rem;
+
+  /*
+   * --- Sombras ---
+   * Muy tenues y en marron, no en negro. Una sombra gris sobre crema se ve
+   * sucia. Ver "sin sombras duras" en docs/ARCHITECTURE.md.
+   */
+  --shadow-reposo: 0 1px 2px rgb(41 30 19 / 0.05);
+  --shadow-elevado: 0 2px 8px rgb(41 30 19 / 0.08);
+}
+
+/*
+ * Accesibilidad y rendimiento son requisito, no acabado.
+ * El usuario tipico es una maestra o un apoderado en un telefono de gama
+ * media con conexion irregular en la costa.
+ */
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  background-color: var(--color-lienzo);
+  color: var(--color-texto);
+  font-family: var(--font-cuerpo);
+  /* Interlineado generoso: el texto respira, como el diseno Waldorf. */
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-titulo);
+  line-height: 1.25;
+  font-weight: 500;
+}
+
+/* Foco siempre visible: se navega con teclado y con lector de pantalla. */
+:focus-visible {
+  outline: 2px solid var(--color-tierra-500);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

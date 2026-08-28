@@ -15,7 +15,7 @@ create type public.tipo_maestro as enum ('guia', 'especialidad');
 create table public.grupo_maestros (
   id          uuid primary key default gen_random_uuid(),
   escuela_id  uuid not null references public.escuelas(id) on delete cascade,
-  grupo_id    uuid not null references public.grupos(id) on delete cascade,
+  grupo_id    uuid not null,
   perfil_id   uuid not null references public.perfiles(id) on delete cascade,
   tipo        public.tipo_maestro not null,
   materia     text,
@@ -86,7 +86,7 @@ create trigger familias_updated_at before update on public.familias
 create table public.familia_miembros (
   id          uuid primary key default gen_random_uuid(),
   escuela_id  uuid not null references public.escuelas(id) on delete cascade,
-  familia_id  uuid not null references public.familias(id) on delete cascade,
+  familia_id  uuid not null,
   perfil_id   uuid not null references public.perfiles(id) on delete cascade,
   relacion    text,
   principal   boolean not null default false,
@@ -121,8 +121,8 @@ grant execute on function app.familias_del_usuario(uuid) to authenticated;
 create table public.ninos (
   id                 uuid primary key default gen_random_uuid(),
   escuela_id         uuid not null references public.escuelas(id) on delete cascade,
-  familia_id         uuid not null references public.familias(id) on delete restrict,
-  grupo_id           uuid references public.grupos(id) on delete set null,
+  familia_id         uuid not null,
+  grupo_id           uuid,
   nombre             text not null,
   apellidos          text not null,
   nombre_preferido   text,
@@ -161,7 +161,7 @@ create table public.comisiones (
 create table public.comision_miembros (
   id           uuid primary key default gen_random_uuid(),
   escuela_id   uuid not null references public.escuelas(id) on delete cascade,
-  comision_id  uuid not null references public.comisiones(id) on delete cascade,
+  comision_id  uuid not null,
   perfil_id    uuid not null references public.perfiles(id) on delete cascade,
   coordina     boolean not null default false,
   created_at   timestamptz not null default now(),
@@ -181,7 +181,7 @@ create trigger comisiones_updated_at before update on public.comisiones
 create table public.tramos_aporte (
   id            uuid primary key default gen_random_uuid(),
   escuela_id    uuid not null references public.escuelas(id) on delete cascade,
-  anio_id       uuid not null references public.anios_escolares(id) on delete cascade,
+  anio_id       uuid not null,
   nombre        text not null,
   monto_sugerido numeric(12,2),
   horas_sugeridas numeric(6,2),
@@ -197,9 +197,9 @@ comment on table public.tramos_aporte is
 create table public.acuerdos_aporte (
   id              uuid primary key default gen_random_uuid(),
   escuela_id      uuid not null references public.escuelas(id) on delete cascade,
-  familia_id      uuid not null references public.familias(id) on delete cascade,
-  anio_id         uuid not null references public.anios_escolares(id) on delete cascade,
-  tramo_id        uuid references public.tramos_aporte(id) on delete set null,
+  familia_id      uuid not null,
+  anio_id         uuid not null,
+  tramo_id        uuid,
   monto_mensual   numeric(12,2) not null default 0,
   horas_mensuales numeric(6,2)  not null default 0,
   notas           text,
@@ -229,14 +229,14 @@ create type public.estado_aporte as enum ('registrado', 'confirmado', 'anulado')
 create table public.aportes (
   id           uuid primary key default gen_random_uuid(),
   escuela_id   uuid not null references public.escuelas(id) on delete cascade,
-  familia_id   uuid not null references public.familias(id) on delete cascade,
-  anio_id      uuid not null references public.anios_escolares(id) on delete cascade,
+  familia_id   uuid not null,
+  anio_id      uuid not null,
   moneda       public.moneda_aporte not null,
   monto        numeric(12,2),
   horas        numeric(6,2),
   fecha        date not null default current_date,
   periodo      date,
-  comision_id  uuid references public.comisiones(id) on delete set null,
+  comision_id  uuid,
   campana_id   uuid,
   descripcion  text,
   estado       public.estado_aporte not null default 'registrado',
@@ -252,6 +252,12 @@ create table public.aportes (
 comment on column public.aportes.periodo is
   'Mes al que se imputa el aporte, normalizado al dia 1.';
 
+-- H11: la normalizacion estaba solo en el comentario. Sin esto, dos aportes
+-- del mismo mes con dia distinto no agregan juntos.
+alter table public.aportes
+  add constraint aportes_periodo_dia_1
+  check (periodo is null or extract(day from periodo) = 1);
+
 create index aportes_familia_idx on public.aportes (familia_id, anio_id, fecha desc);
 create index aportes_periodo_idx on public.aportes (escuela_id, periodo);
 
@@ -266,9 +272,9 @@ create trigger aportes_updated_at before update on public.aportes
 create table public.campanas (
   id           uuid primary key default gen_random_uuid(),
   escuela_id   uuid not null references public.escuelas(id) on delete cascade,
-  anio_id      uuid references public.anios_escolares(id) on delete cascade,
-  epoca_id     uuid references public.epocas(id) on delete set null,
-  comision_id  uuid references public.comisiones(id) on delete set null,
+  anio_id      uuid,
+  epoca_id     uuid,
+  comision_id  uuid,
   nombre       text not null,
   descripcion  text,
   meta_monto   numeric(12,2),
@@ -281,12 +287,74 @@ create table public.campanas (
   check (fin is null or inicio is null or fin >= inicio)
 );
 
-alter table public.aportes
-  add constraint aportes_campana_fk
-  foreign key (campana_id) references public.campanas(id) on delete set null;
-
 create trigger campanas_updated_at before update on public.campanas
   for each row execute function app.set_updated_at();
+
+
+-- =====================================================================
+-- Integridad multi-tenant (B3)
+--
+-- unique (id, escuela_id) en el padre + FK compuesta en la hija. Ver la
+-- explicacion extendida en 0002_ritmo.sql. Las FK opcionales usan
+-- `on delete set null (columna)` para no anular escuela_id, que es not null.
+-- =====================================================================
+
+alter table public.familias
+  add constraint familias_id_escuela_key unique (id, escuela_id);
+alter table public.comisiones
+  add constraint comisiones_id_escuela_key unique (id, escuela_id);
+alter table public.tramos_aporte
+  add constraint tramos_id_escuela_key unique (id, escuela_id);
+alter table public.campanas
+  add constraint campanas_id_escuela_key unique (id, escuela_id);
+
+alter table public.grupo_maestros
+  add constraint grupo_maestros_grupo_fk foreign key (grupo_id, escuela_id)
+    references public.grupos (id, escuela_id) on delete cascade;
+
+alter table public.familia_miembros
+  add constraint familia_miembros_familia_fk foreign key (familia_id, escuela_id)
+    references public.familias (id, escuela_id) on delete cascade;
+
+alter table public.ninos
+  add constraint ninos_familia_fk foreign key (familia_id, escuela_id)
+    references public.familias (id, escuela_id) on delete restrict,
+  add constraint ninos_grupo_fk foreign key (grupo_id, escuela_id)
+    references public.grupos (id, escuela_id) on delete set null (grupo_id);
+
+alter table public.comision_miembros
+  add constraint comision_miembros_comision_fk foreign key (comision_id, escuela_id)
+    references public.comisiones (id, escuela_id) on delete cascade;
+
+alter table public.tramos_aporte
+  add constraint tramos_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade;
+
+alter table public.acuerdos_aporte
+  add constraint acuerdos_familia_fk foreign key (familia_id, escuela_id)
+    references public.familias (id, escuela_id) on delete cascade,
+  add constraint acuerdos_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint acuerdos_tramo_fk foreign key (tramo_id, escuela_id)
+    references public.tramos_aporte (id, escuela_id) on delete set null (tramo_id);
+
+alter table public.aportes
+  add constraint aportes_familia_fk foreign key (familia_id, escuela_id)
+    references public.familias (id, escuela_id) on delete cascade,
+  add constraint aportes_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint aportes_comision_fk foreign key (comision_id, escuela_id)
+    references public.comisiones (id, escuela_id) on delete set null (comision_id),
+  add constraint aportes_campana_fk foreign key (campana_id, escuela_id)
+    references public.campanas (id, escuela_id) on delete set null (campana_id);
+
+alter table public.campanas
+  add constraint campanas_anio_fk foreign key (anio_id, escuela_id)
+    references public.anios_escolares (id, escuela_id) on delete cascade,
+  add constraint campanas_epoca_fk foreign key (epoca_id, escuela_id)
+    references public.epocas (id, escuela_id) on delete set null (epoca_id),
+  add constraint campanas_comision_fk foreign key (comision_id, escuela_id)
+    references public.comisiones (id, escuela_id) on delete set null (comision_id);
 
 
 -- =====================================================================
@@ -370,10 +438,12 @@ create policy ninos_select on public.ninos
     or familia_id in (select app.familias_del_usuario(escuela_id))
   );
 
+-- H13: es_gestor incluye a colegio_maestros. Segun la tabla de roles de
+-- docs/DOMAIN.md, familias y ninos son ambito de administracion.
 create policy ninos_write on public.ninos
   for all to authenticated
-  using (app.es_gestor(escuela_id))
-  with check (app.es_gestor(escuela_id));
+  using (app.tiene_rol(escuela_id, array['administracion']::public.rol_escuela[]))
+  with check (app.tiene_rol(escuela_id, array['administracion']::public.rol_escuela[]));
 
 
 -- Economia: la familia ve lo suyo, la administracion gestiona.
@@ -428,3 +498,79 @@ begin
     $f$, t);
   end loop;
 end $$;
+
+
+-- =====================================================================
+-- H7 — El rol `comision` tenia alcance en docs/DOMAIN.md pero no aparecia
+-- en ninguna politica: un coordinador no podia gestionar su propia campana.
+--
+-- Alcance acotado a lo que hoy existe en el esquema: su comision y las
+-- campanas ancladas a ella. Tareas y presupuesto todavia no se modelan.
+-- =====================================================================
+
+create or replace function app.es_miembro_de_comision(p_comision uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $fn$
+  select exists (
+    select 1
+    from public.comision_miembros cm
+    where cm.comision_id = p_comision
+      and cm.perfil_id = auth.uid()
+  );
+$fn$;
+
+grant execute on function app.es_miembro_de_comision(uuid) to authenticated;
+
+create policy campanas_comision on public.campanas
+  for all to authenticated
+  using (
+    comision_id is not null
+    and app.es_miembro(escuela_id)
+    and app.es_miembro_de_comision(comision_id)
+  )
+  with check (
+    comision_id is not null
+    and app.es_miembro(escuela_id)
+    and app.es_miembro_de_comision(comision_id)
+  );
+
+
+-- =====================================================================
+-- H8 — Auditoria faltante en comisiones y sus integrantes (nivel personal)
+-- =====================================================================
+
+do $do$
+declare t text;
+begin
+  foreach t in array array['comisiones','comision_miembros']
+  loop
+    execute format($f$
+      create trigger %1$I_auditoria
+        after insert or update or delete on public.%1$I
+        for each row execute function app.auditar('completo')
+    $f$, t);
+  end loop;
+end $do$;
+
+
+-- =====================================================================
+-- H12 — Privilegios explicitos de tabla
+-- =====================================================================
+
+do $do$
+declare t text;
+begin
+  foreach t in array array[
+    'grupo_maestros','familias','familia_miembros','ninos',
+    'comisiones','comision_miembros','tramos_aporte',
+    'acuerdos_aporte','aportes','campanas'
+  ]
+  loop
+    execute format(
+      'grant select, insert, update, delete on public.%I to authenticated', t);
+  end loop;
+end $do$;
