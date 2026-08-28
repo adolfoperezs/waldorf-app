@@ -1,0 +1,74 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.js
+yarn.lock
+pnpm-lock.yaml
+
+# Testing
+/coverage
+
+# Next.js
+/.next/
+/out/
+*.rsc
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env*.local
+!.env.example
+
+# Vercel
+.vercel
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# OS
+Thumbs.db
+.AppleDouble
+.LSOverride
+
+# Claude Code
+.claude/skills/**/node_modules
+.claude/plugins
+
+# Supabase
+supabase/.branches
+supabase/.temp
+
+# MCP: .mcp.json SI se versiona (usa ${SUPABASE_ACCESS_TOKEN}, sin secretos).
+# El token vive en el entorno, nunca en el repositorio.
+/.mcp.local.json
+
+# Claude Code local
+.claude/logs/
+.claude/settings.local.json
+
+# Supabase local
+supabase/.temp
+supabase/.branches
