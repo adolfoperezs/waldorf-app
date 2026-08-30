@@ -47,7 +47,14 @@ test('alta de cuenta, alta de escuela y entrada a la escuela', async ({ page }) 
   await expect(
     page.getByRole('heading', { name: 'Escuela Waldorf Kimun' }),
   ).toBeVisible()
-  await expect(page.getByText('Administracion')).toBeVisible()
+
+  // La escuela nace sin anio escolar: el calendario lo dice y ofrece crearlo.
+  // Ese boton solo se renderiza para gestores, asi que su presencia prueba el
+  // rol mejor que una etiqueta.
+  await expect(page.getByText('Todavia no hay un anio escolar activo')).toBeVisible()
+  await expect(
+    page.getByRole('link', { name: 'Crear el anio escolar' }),
+  ).toBeVisible()
 })
 
 test('cerrar sesion y volver a entrar', async ({ page }) => {

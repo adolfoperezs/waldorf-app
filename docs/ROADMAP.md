@@ -31,16 +31,26 @@ migraciones antes del primer `db push`; ver
 
 ## Fase 1 — Ritmo
 
-- [ ] Migración `0002_ritmo`
-- [ ] Año escolar: crear, activar, cerrar
-- [ ] Épocas: crear, ordenar, validar solapamiento
-- [ ] Festividades y calendario anual
-- [ ] Eventos con inscripción y asistencia
-- [ ] Minuta por época y día
-- [ ] Vista de calendario para familias, móvil primero
-- [ ] Exportación a texto para pegar en WhatsApp
+- [x] Migración `0002_ritmo` — más `0004_ritmo_rpc` con `activar_anio` y
+      `materializar_plantilla`, que existen por atomicidad
+- [x] Año escolar: crear, activar, cerrar
+- [x] Épocas: crear, editar, reordenar, validar solapamiento
+- [x] Festividades y calendario anual
+- [x] Eventos con inscripción y asistencia
+- [x] Minuta por época y día
+- [x] Vista de calendario para familias, móvil primero
+- [x] Exportación a texto para pegar en WhatsApp
 
 Criterio de salida: Kimün planifica su año completo en el sistema.
+
+**Cumplido el 2026-08-30.** La plantilla de la escuela se materializa en un año con un
+clic: épocas repartidas a lo largo del año, festividades resueltas de mes/día a fecha y
+minuta semanal. Desde ahí la escuela lo ajusta todo.
+
+Pendientes conscientes, para cuando aparezca la necesidad real: las festividades móviles
+(Pascua) se ajustan a mano, porque no se pueden fijar por mes y día; las épocas de grupo
+se pueden crear, pero los grupos todavía no se administran (llegan en la Fase 2); y de
+festividades y eventos hay alta y baja, no edición.
 
 ## Fase 2 — Comunidad y economía
 

@@ -33,6 +33,7 @@ type Escuela = {
   epocaId: string
   familiaId: string
   ninoId: string
+  eventoId: string
 }
 
 function clienteAnonimo() {
@@ -113,6 +114,38 @@ async function montarEscuela(etiqueta: string): Promise<Escuela> {
     .single()
   expect(errorNino, `nino de ${etiqueta}`).toBeNull()
 
+  // Ritmo: un encuentro, una minuta y una festividad, para que el aislamiento
+  // se pruebe tambien sobre las tablas de la Fase 1.
+  const { data: evento, error: errorEvento } = await cliente
+    .from('eventos')
+    .insert({
+      escuela_id: escuelaId,
+      anio_id: anio!.id,
+      tipo: 'jornada',
+      titulo: `Jornada de ${etiqueta}`,
+      inicio: '2026-05-09T13:00:00Z',
+      publico: true,
+    })
+    .select('id')
+    .single()
+  expect(errorEvento, `evento de ${etiqueta}`).toBeNull()
+
+  const { error: errorMinuta } = await cliente.from('minutas').insert({
+    escuela_id: escuelaId,
+    epoca_id: epoca!.id,
+    dia_semana: 1,
+    plato: `Arroz de ${etiqueta}`,
+  })
+  expect(errorMinuta, `minuta de ${etiqueta}`).toBeNull()
+
+  const { error: errorFestividad } = await cliente.from('festividades').insert({
+    escuela_id: escuelaId,
+    anio_id: anio!.id,
+    nombre: `San Miguel de ${etiqueta}`,
+    fecha: '2026-09-29',
+  })
+  expect(errorFestividad, `festividad de ${etiqueta}`).toBeNull()
+
   return {
     cliente,
     escuelaId: escuelaId as string,
@@ -121,6 +154,7 @@ async function montarEscuela(etiqueta: string): Promise<Escuela> {
     epocaId: epoca!.id,
     familiaId: familia!.id,
     ninoId: nino!.id,
+    eventoId: evento!.id,
   }
 }
 
@@ -143,6 +177,9 @@ test('las tablas de dominio no filtran filas de la otra escuela', async () => {
     'escuelas',
     'anios_escolares',
     'epocas',
+    'festividades',
+    'eventos',
+    'minutas',
     'familias',
     'ninos',
   ] as const
@@ -245,4 +282,29 @@ test('B4: la auditoria propia de escuelas si es visible', async () => {
 
   expect(error).toBeNull()
   expect(data!.length).toBeGreaterThan(0)
+})
+
+test('el encuentro de la otra escuela no se ve ni por su id', async () => {
+  const { data, error } = await a.cliente
+    .from('eventos')
+    .select('id')
+    .eq('id', b.eventoId)
+    .maybeSingle()
+
+  expect(error).toBeNull()
+  expect(data).toBeNull()
+})
+
+test('no se puede inscribir a nadie en un encuentro de la otra escuela', async () => {
+  const { data: usuario } = await a.cliente.auth.getUser()
+
+  const { error } = await a.cliente.from('evento_inscripciones').insert({
+    escuela_id: a.escuelaId,
+    evento_id: b.eventoId,
+    perfil_id: usuario.user!.id,
+  })
+
+  // La FK compuesta (evento_id, escuela_id) lo hace imposible aunque la RLS
+  // aprobara la fila: el evento no es de esta escuela.
+  expect(error, 'inscribirse en un evento ajeno deberia fallar').not.toBeNull()
 })

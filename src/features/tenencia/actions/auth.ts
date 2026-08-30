@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
 import { credencialesSchema, registroSchema } from '../schemas/auth'
-import { estadoInicial, type EstadoFormulario } from './tipos'
+import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 
 /**
  * Fase 0 del roadmap: email y contrasena, sin OAuth.

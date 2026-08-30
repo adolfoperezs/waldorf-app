@@ -5,7 +5,7 @@ import { useFormStatus } from 'react-dom'
 import { Boton } from '@/shared/ui/boton'
 import { Campo } from '@/shared/ui/campo'
 import { registrarse } from '../actions/auth'
-import { estadoInicial } from '../actions/tipos'
+import { estadoInicial } from '@/shared/lib/formulario'
 
 function BotonEnviar() {
   const { pending } = useFormStatus()

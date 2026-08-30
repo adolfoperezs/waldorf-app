@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
 import { leerPlantilla, PLANTILLA_POR_DEFECTO } from '../lib/plantillas'
 import { crearEscuelaSchema } from '../schemas/escuela'
-import { estadoInicial, type EstadoFormulario } from './tipos'
+import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 
 /**
  * Alta de una escuela y de su primer administrador.

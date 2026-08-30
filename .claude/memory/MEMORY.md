@@ -30,6 +30,9 @@
 
 - [verificacion](reference/verificacion.md) - Las tres consultas de tenancy-guard, el
   test de aislamiento y que se corre despues de cada migracion y cada feature.
+- [escollos-de-tests](reference/escollos-de-tests.md) - Un UPDATE sin `.select()` miente
+  cuando la RLS filtra la fila, y un `.click()` de Playwright no espera a que la pagina
+  cambie. Los dos dan sintomas que apuntan al sitio equivocado.
 - [escollos-de-dependencias](reference/escollos-de-dependencias.md) - @supabase/ssr y
   supabase-js tienen que ir a la par o todo tabla tipa como `never`. Los tests pasan
   igual: el sintoma solo sale en tsc.

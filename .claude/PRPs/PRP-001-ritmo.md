@@ -1,6 +1,6 @@
 # PRP-001: Ritmo — el calendario Waldorf
 
-> **Estado**: PENDIENTE
+> **Estado**: COMPLETADO (2026-08-30)
 > **Fecha**: 2026-08-28
 > **Proyecto**: Sistema de Gestión Waldorf
 > **Fase del roadmap**: 1
@@ -210,8 +210,54 @@ procesar mensajes de WhatsApp (`docs/ARCHITECTURE.md`).
 
 ## Aprendizajes
 
-> Crece durante la implementación.
+### 2026-08-30: `security invoker` en vez de `security definer`
+
+- **Lo previsto**: el PRP daba por hecho que `activar_anio` y `materializar_plantilla`
+  serían `security definer` con `app.es_gestor` comprobado dentro.
+- **Lo hecho**: `security invoker`. Un gestor ya tiene permiso de escritura sobre esas
+  tablas por RLS, así que no hay nada que saltarse. Estas funciones existen por
+  **atomicidad**, no por privilegio, y confundir ambas cosas mete un `definer`
+  innecesario en el sistema.
+- **Efecto secundario mejor de lo esperado**: quien no es miembro recibe «el año no
+  existe» en vez de un 403, porque la RLS le oculta la fila incluso dentro de la
+  función. Es la misma decisión que el 404 de las escuelas ajenas.
+- **Aplicar en**: toda RPC futura. Preguntar primero «¿esto necesita saltarse la RLS?».
+  Casi siempre la respuesta es no.
+
+### 2026-08-30: encadenar las épocas dejaba medio año vacío
+
+- **Error**: la primera versión de `materializar_plantilla` ponía las épocas una detrás
+  de otra desde el primer día. Para Kimün eso daba épocas de marzo a agosto en un año
+  que llega a diciembre, y ninguna festividad del segundo semestre caía dentro de una.
+- **Fix**: repartirlas a lo largo del año con un hueco igual entre cada una. Los huecos
+  son las vacaciones y los intermedios.
+- **Aplicar en**: cualquier materialización de plantilla. Un dato semilla que se ve
+  obviamente mal al primer vistazo no sirve como punto de partida.
+
+### 2026-08-30: un año lectivo que cruza el año civil
+
+- **Error**: las fechas se mostraban sin año. En el hemisferio norte el año lectivo va
+  de septiembre a junio, así que «5 de abril» aparecía después de «1 de diciembre» y
+  parecía un error de orden.
+- **Fix**: `cruzaAnioCivil(inicio, fin)`; cuando cruza, las fechas llevan el año. En
+  Chile no cruza y no aparece.
+- **Aplicar en**: toda vista con fechas de un año escolar. Salió mirando una captura, no
+  de un test: conviene mirar la pantalla.
+
+### 2026-08-30: `date` y `timestamptz` no se formatean igual
+
+- **Error potencial**: pasar un `date` ('2026-09-29') por `new Date()` y formatearlo en
+  una zona al oeste de Greenwich lo corre al día anterior.
+- **Fix**: `formatearDia` ancla el día al mediodía UTC y formatea en UTC; solo los
+  `timestamptz` se presentan en la zona de la escuela. Hay un test que lo fija.
+- **Aplicar en**: fechas de festividades, épocas, años y, más adelante, informes.
+
+### 2026-08-30: el desfase horario se pide para la fecha del evento
+
+- Al construir un instante desde fecha y hora locales, el desfase se pregunta **para la
+  fecha del evento**, no para hoy: entre septiembre y abril Chile cambia de huso, y usar
+  el desfase actual corre el evento una hora. Cubierto en `tests/whatsapp.spec.ts`.
 
 ---
 
-*PRP pendiente de aprobación. No se ha modificado código de esta fase.*
+*Implementado y verificado. Ver `docs/ROADMAP.md` para lo que quedó fuera a propósito.*

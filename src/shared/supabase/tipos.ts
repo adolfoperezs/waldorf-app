@@ -1186,6 +1186,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      activar_anio: { Args: { p_anio: string }; Returns: undefined }
       crear_escuela: {
         Args: {
           p_hemisferio?: string
@@ -1197,6 +1198,10 @@ export type Database = {
           p_zona_horaria?: string
         }
         Returns: string
+      }
+      materializar_plantilla: {
+        Args: { p_anio: string; p_plantilla: Json }
+        Returns: undefined
       }
     }
     Enums: {
