@@ -5,7 +5,8 @@
       "args": [
         "-y",
         "@supabase/mcp-server-supabase@latest",
-        "--project-ref=REEMPLAZAR_CON_REF_DE_WALDORF_DEV"
+        "--project-ref=jxnrdwlqqyhbscyombym",
+        "--read-only"
       ],
       "env": {
         "SUPABASE_ACCESS_TOKEN": "${SUPABASE_ACCESS_TOKEN}"
