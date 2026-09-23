@@ -18,14 +18,14 @@ flowchart LR
     subgraph VER["Vercel · Washington (iad1)"]
         P["proxy.ts<br/>refresca la sesión<br/>y exige haber entrado"]
         L["Marco de la escuela<br/>¿eres miembro de ella?"]
-        PG["Páginas<br/>calendario, épocas, encuentros"]
+        PG["Páginas<br/>ritmo de cada niño · mi curso<br/>calendario · grupos · familias"]
         SA["Acciones del servidor<br/>validan con Zod"]
     end
 
     subgraph SUP["Supabase · Virginia (us-east-1)"]
         AU["Auth<br/>cuentas y sesiones"]
         DB[("Postgres<br/>tablas con RLS")]
-        FN["Funciones<br/>crear_escuela · activar_anio<br/>materializar_plantilla<br/>aceptar_invitacion"]
+        FN["Funciones<br/>crear_escuela · activar_anio<br/>materializar_plantilla<br/>aceptar_invitacion · sumar_familia<br/>ninos_de_mi_familia · ninos_de_escuela"]
         AUD[("auditoria")]
     end
 
@@ -70,7 +70,7 @@ flowchart TB
         MEM["Membresía con un rol<br/><b>= puede entrar a la escuela</b>"]
 
         subgraph REL["Relaciones concretas = a qué datos llega"]
-            GM["grupo_maestros<br/>es maestra de ESE grupo<br/>→ ve a esos niños"]
+            GM["grupo_maestros<br/>es maestra de ESE grupo<br/>→ carga su ritmo semanal"]
             FM["familia_miembros<br/>pertenece a ESA familia<br/>→ ve a sus hijos y sus aportes"]
             CM["comision_miembros<br/>integra ESA comisión<br/>→ gestiona sus campañas"]
         end
@@ -88,7 +88,8 @@ flowchart TB
 - **Las relaciones dicen a qué datos concretos llega.** Invitar a alguien como *maestro
   guía* le abre la escuela, pero **no le muestra ningún niño** hasta que se la asigna a un
   grupo. Invitar a alguien como *familia* le abre el calendario, pero no le muestra a sus
-  hijos hasta que se la vincula a su familia.
+  hijos hasta que se la vincula a su familia. Por eso "Sumar familia" crea la invitación
+  **ya atada a la familia**: al aceptarla, la persona queda en `familia_miembros`.
 
 Esto es deliberado: el acceso a datos de niños nunca se deduce de una etiqueta, siempre de
 un vínculo explícito y con vigencia.
@@ -108,8 +109,10 @@ flowchart LR
         IN["Inscripciones<br/>y asistencia"]
     end
 
-    subgraph COM["Comunidad — tablas listas, sin pantallas"]
+    subgraph COM["Comunidad — construido (comisiones sin pantallas)"]
+        CI["Ciclos<br/>jardín o escolar"]
         G["Grupos<br/>persisten varios años"]
+        RS["Ritmo semanal<br/>por grupo, borrador o publicado"]
         FA["Familias"]
         NI["Niños"]
         CO["Comisiones"]
@@ -128,6 +131,9 @@ flowchart LR
     EP --> MI
     E --> EV
     EV --> IN
+    E --> CI
+    CI --> G
+    G --> RS
     E --> G
     E --> FA
     FA --> NI
@@ -158,13 +164,15 @@ Leído de las políticas de seguridad aplicadas hoy en producción.
 | Encuentros públicos | ✏️ | ✏️ | 👁️ | 👁️ |
 | Encuentros internos del equipo | ✏️ | ✏️ | — | — |
 | Inscribirse a un encuentro | 🔸 | 🔸 | 🔸 | 🔸 |
-| Grupos y sus maestras | ✏️ | ✏️ | 👁️ | 👁️ |
+| Ciclos, grupos y sus maestras | ✏️ | ✏️ | 👁️ | 👁️ |
+| Ritmo semanal en borrador | ✏️ | ✏️ | ✏️ de su grupo | — |
+| Ritmo semanal publicado | ✏️ | ✏️ | ✏️ de su grupo, 👁️ el resto | 👁️ |
 | Comisiones y sus integrantes | ✏️ | ✏️ | 👁️ | 👁️ |
 | Campañas | ✏️ | ✏️ | 👁️ ¹ | 👁️ ¹ |
 | Miembros de la escuela | ✏️ | 👁️ | 🔸 | 🔸 |
 | Invitaciones | ✏️ | — | — | — |
 | Familias | ✏️ | 👁️ ² | — | 🔸 |
-| Niños | ✏️ | 👁️ ² | 🔸 de su grupo | 🔸 sus hijos |
+| Niños | ✏️ | 👁️ ² | 🔸 de su grupo | 🔸 sus hijos ³ |
 | Tramos de aporte | ✏️ | 👁️ | 👁️ | 👁️ |
 | Acuerdos y aportes | ✏️ | — | — | 🔸 |
 | Auditoría | 👁️ | — | — | — |
@@ -172,6 +180,9 @@ Leído de las políticas de seguridad aplicadas hoy en producción.
 1. Quien integra una comisión puede además gestionar las campañas de **esa** comisión. Lo
    da la relación `comision_miembros`, no el rol.
 2. Ver la sección 7: esto no calza con `PRIVACY.md`.
+3. La aplicación no lee `ninos` directo: pasa por `ninos_de_mi_familia` (solo los hijos de
+   quien pregunta) y `ninos_de_escuela` (todos, solo administración). Las dos dejan cada
+   lectura en la auditoría, como exige el nivel Menor.
 
 Además, **cualquier persona con cuenta puede crear una escuela nueva**, y queda como su
 administración. Es el único punto del sistema que se salta la RLS, a propósito.
@@ -189,7 +200,7 @@ sequenceDiagram
     participant C as Página del calendario
     participant S as Postgres (RLS)
 
-    F->>P: abre /kimun
+    F->>P: abre /kimun-algarrobo
     P->>S: ¿la sesión sigue viva?
     S-->>P: sí, es la persona X
     P->>L: adelante
@@ -197,14 +208,34 @@ sequenceDiagram
     Note over S: escuelas_select<br/>¿X es miembro vigente?
     S-->>L: la fila, o nada y la página responde 404
     L->>C: dibuja
-    C->>S: épocas, festividades, encuentros, minuta
-    Note over S: eventos_select oculta a una<br/>familia los encuentros internos
+    C->>S: ninos_de_mi_familia
+    Note over S: solo los hijos de X<br/>y cada lectura queda en la auditoría
+    S-->>C: Isidora (Grupo Semilla) · Mateo (4° básico)
+    C->>S: ritmo publicado de sus grupos, época vigente, minuta, avisos
+    Note over S: ritmos_semanales_select oculta<br/>los borradores de la maestra
     S-->>C: solo lo que X puede ver
-    C-->>F: la página
+    C-->>F: selector de hijos y el ritmo de cada uno según su ciclo
 ```
 
 Si X no pertenece a la escuela, la respuesta es **404, no 403**: quien no es miembro no
 tiene por qué saber siquiera que esa escuela existe.
+
+Quien no tiene hijos en la escuela (el equipo) ve en la portada el calendario, que para
+todos vive además en `/calendario`.
+
+### El ritmo según el ciclo
+
+El ciclo del grupo (`ciclos.modalidad`) decide qué ve la familia. Los nombres ("Grupo
+Semilla", "Básica") son de cada escuela; la modalidad es la diferencia pedagógica real.
+
+| | Jardín (primer septenio) | Escolar (básica y media) |
+|---|---|---|
+| Arriba | Cuento, ronda o arquetipo de la semana | Época activa con su avance (semana 2 de 4) y tema de la semana |
+| Cada día | Cereal y actividad | Cereal, clase principal y materias especiales |
+| Abajo | Qué llevar y recordar | Materiales, recordatorio y avisos del curso |
+| Nunca | Asignaturas, épocas académicas | — |
+
+El cereal del día sale de la minuta de la época, salvo que la maestra escriba otro.
 
 ## 5. Qué pasa cuando alguien guarda algo
 
@@ -240,7 +271,9 @@ flowchart TB
     E --> F["Lo activa<br/>activar_anio"]
     F --> G["Carga la plantilla<br/>materializar_plantilla"]
     G --> H["Épocas repartidas en el año<br/>festividades · minuta semanal"]
-    C --> I["Invita a maestras<br/>y familias"]
+    C --> I["Invita a maestras<br/>desde Miembros"]
+    C --> J["Carga ciclos y grupos<br/>y asigna maestras guía"]
+    J --> K["Suma familias con sus niños<br/>sumar_familia"]
 ```
 
 La plantilla (`supabase/seed/plantillas/kimun-cl.json`) es **dato, no código**: cuántas
@@ -283,6 +316,38 @@ sequenceDiagram
 - `aceptar_invitacion` es el segundo punto que se salta la RLS, y por la misma razón que
   `crear_escuela`: quien acepta todavía no es miembro y no podría crearse la membresía.
 
+### Sumar una familia
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as Administración
+    participant App as Aplicación
+    participant DB as Postgres
+    actor M as Apoderada
+
+    A->>App: + Sumar familia: nombre, niños con su grupo, hermanos
+    App->>DB: sumar_familia (una transacción, con la RLS de administración)
+    Note over DB: familia + niños + invitación<br/>atada a esa familia
+    App-->>A: mensaje de bienvenida con el enlace
+    A->>M: Enviar por WhatsApp (abre la app con el texto escrito)
+    M->>App: abre el enlace y crea su cuenta
+    M->>App: Aceptar
+    App->>DB: aceptar_invitacion
+    Note over DB: membresía de familia<br/>+ familia_miembros
+    App-->>M: entra viendo el ritmo de sus hijos
+```
+
+Cada enlace sirve a una sola persona. El segundo apoderado recibe el suyo desde la tarjeta
+de la familia ("Invitar a alguien más").
+
+### Publicar el ritmo de la semana
+
+La maestra abre **Mi curso**, toca cada día para cargarlo (panel lateral) y pulsa
+**Publicar ritmo para familias**. Antes de publicar es un borrador que solo ven ella y los
+gestores. Después, la aplicación deja listo el resumen para mandarlo al grupo de WhatsApp
+del curso: no enviamos notificaciones, integramos con lo que la comunidad ya usa.
+
 ---
 
 ## 7. Discrepancias detectadas al hacer este mapa
@@ -294,9 +359,10 @@ Cosas que el sistema hace hoy y que no calzan con `PRIVACY.md`. No están correg
 | P1 | El **colegio de maestros ve todas las familias y todos los niños** de la escuela, porque las políticas usan `es_gestor`, que incluye al colegio. | Niños (nivel Menor): administración, maestro **del grupo** y su familia. Familias (nivel Personal): administración y el propio titular. |
 | P2 | **Cualquier miembro puede leer nombre, correo y teléfono de todos los demás miembros** de su escuela (`perfiles_select_companeros`). Una familia puede ver el teléfono de otra. | Datos personales: administración y el propio titular. |
 
-Ninguna de las dos se ve hoy en pantalla —no hay vistas de familias ni de miembros para no
-administradores—, pero sí son accesibles a través de la API con una sesión válida. Conviene
-corregirlas antes de cargar datos reales de familias (Fase 2).
+Ninguna de las dos se ve hoy en pantalla —la página de Familias es solo de administración,
+y la aplicación lee niños únicamente por las funciones auditadas—, pero sí son accesibles a
+través de la API con una sesión válida. Conviene corregirlas antes de cargar datos reales de
+familias.
 
 ---
 
@@ -307,7 +373,9 @@ corregirlas antes de cargar datos reales de familias (Fase 2).
 | Tenencia: cuentas, escuelas, membresías | ✅ | ✅ |
 | Invitaciones | ✅ | ✅ |
 | Ritmo: año, épocas, festividades, minuta, encuentros | ✅ | ✅ |
-| Comunidad: familias, niños, grupos, comisiones | ✅ | — |
+| Ritmo semanal por grupo y vista por niño | ✅ | ✅ |
+| Comunidad: ciclos, grupos, familias, niños | ✅ | ✅ |
+| Comunidad: comisiones | ✅ | — |
 | Economía: acuerdos, aportes, campañas | ✅ | — |
 | Desarrollo: observaciones, informes | — | — |
 | Privacidad: consentimientos, derechos del titular | auditoría de escrituras | — |

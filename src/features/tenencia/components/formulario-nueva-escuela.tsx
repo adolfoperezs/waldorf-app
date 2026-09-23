@@ -31,15 +31,15 @@ export function FormularioNuevaEscuela() {
       <Campo
         id="nombre"
         etiqueta="Nombre de la escuela"
-        placeholder="Escuela Waldorf Kimun"
+        placeholder="Escuela Waldorf Kimün"
         required
         errores={estado.errores?.nombre}
       />
 
       <Campo
         id="slug"
-        etiqueta="Identificador en la direccion"
-        ayuda="Aparece en la URL. Solo minusculas, numeros y guiones."
+        etiqueta="Identificador en la dirección"
+        ayuda="Aparece en la URL. Solo minúsculas, números y guiones."
         placeholder="kimun"
         required
         errores={estado.errores?.slug}
@@ -48,8 +48,8 @@ export function FormularioNuevaEscuela() {
       <div className="grid gap-5 sm:grid-cols-2">
         <Campo
           id="pais"
-          etiqueta="Pais"
-          ayuda="Codigo de dos letras"
+          etiqueta="País"
+          ayuda="Código de dos letras"
           defaultValue="CL"
           maxLength={2}
           required
@@ -59,7 +59,7 @@ export function FormularioNuevaEscuela() {
         <Campo
           id="moneda"
           etiqueta="Moneda"
-          ayuda="Codigo de tres letras"
+          ayuda="Código de tres letras"
           defaultValue="CLP"
           maxLength={3}
           required
@@ -86,9 +86,9 @@ export function FormularioNuevaEscuela() {
             defaultValue="es"
             className="min-h-11 w-full rounded-suave border border-borde bg-superficie px-3 text-base"
           >
-            <option value="es">Espanol</option>
-            <option value="de">Aleman</option>
-            <option value="en">Ingles</option>
+            <option value="es">Español</option>
+            <option value="de">Alemán</option>
+            <option value="en">Inglés</option>
           </select>
         </div>
 

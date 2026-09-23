@@ -40,7 +40,7 @@ export async function crearAnio(
 
   if (error) {
     if (error.code === '23505') {
-      return { ...estadoInicial, errores: { nombre: ['Ya existe un anio con ese nombre'] } }
+      return { ...estadoInicial, errores: { nombre: ['Ya existe un año con ese nombre'] } }
     }
     return { ...estadoInicial, error: mensajeDeError(error.code) }
   }

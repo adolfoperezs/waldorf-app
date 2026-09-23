@@ -20,7 +20,7 @@ export function LineaDeEpocas({
   conAnio?: boolean
 }) {
   if (epocas.length === 0) {
-    return <p className="text-texto-suave">Todavia no hay epocas en este anio.</p>
+    return <p className="text-texto-suave">Todavía no hay épocas en este año.</p>
   }
 
   return (
@@ -42,7 +42,7 @@ export function LineaDeEpocas({
             ].join(' ')}
           >
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <h3 className="font-titulo text-lg text-tierra-800">{epoca.nombre}</h3>
+              <h3 className="font-titulo text-lg text-primario-oscuro">{epoca.nombre}</h3>
               {enCurso && (
                 <span className="rounded-suave bg-tierra-500 px-2 py-0.5 text-xs text-crema-50">
                   En curso

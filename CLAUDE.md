@@ -20,6 +20,7 @@ implementación contradice el modelo de dominio, la que cede es la implementaci�
 | `docs/ARCHITECTURE.md` | Antes de crear archivos, carpetas, migraciones o rutas. |
 | `docs/PRIVACY.md` | Antes de modelar cualquier dato de una persona. |
 | `docs/ROADMAP.md` | Para saber qué está dentro y fuera del alcance actual. |
+| `docs/lineamientos/` | Antes de tocar la interfaz. Lineamientos de la escuela; su reconciliación con el dominio está en el PRP que los cita. |
 
 ## Reglas no negociables
 

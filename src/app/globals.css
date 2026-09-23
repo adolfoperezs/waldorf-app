@@ -1,50 +1,60 @@
 @import "tailwindcss";
 
 /*
- * Sistema de diseno Waldorf
+ * Sistema de diseno "Digital Organico"
  *
  * Ninguno de los cinco design systems del SaaS Factory sirve: neobrutalism,
  * neumorphism y liquid glass son lenguaje visual de startup y la comunidad
  * Waldorf los lee como ajenos. Ver "Estetica" en docs/ARCHITECTURE.md.
  *
- * Base: la paleta del Welcome Kit de Kimun. Cremas, marrones calidos, tonos
- * tierra. Serif para titulos. Mucho aire. Sin sombras duras ni gradientes.
+ * Valores: los tokens de Kimun del lineamiento
+ * docs/lineamientos/2026-09-especificacion-ux-kimun.md, seccion 4. Lino
+ * crudo, madera, tierra. Serif para titulos, sans limpia para la interfaz.
+ * Mucho aire. Sin sombras duras ni gradientes.
  *
  * Tailwind v4 genera una variable CSS por cada token de este bloque, asi que
- * `--color-tierra-500` existe en runtime y `bg-tierra-500` existe en utilidades.
+ * `--color-primario` existe en runtime y `bg-primario` existe en utilidades.
  * src/shared/design/waldorf.ts los re-exporta tipados para el JS que los
  * necesite. Los valores se definen aqui una sola vez.
  */
 
 @theme {
-  /* --- Cremas: fondos. Es papel, no pantalla. --- */
-  --color-crema-50: #fbf7f0;
-  --color-crema-100: #f5eee2;
-  --color-crema-200: #ebe0ce;
-  --color-crema-300: #decfb6;
+  /* --- Fondos: es papel de algodon, no pantalla. --- */
+  --color-crema-50: #faf7f2;
+  --color-crema-100: #f5efe6;
+  --color-crema-200: #ede5d8;
+  --color-crema-300: #e8e0d2;
 
-  /* --- Tierra: texto, bordes y acento principal. --- */
-  --color-tierra-200: #d8c3a5;
-  --color-tierra-300: #c0a381;
-  --color-tierra-400: #a4835c;
-  --color-tierra-500: #876743;
-  --color-tierra-600: #6d5134;
-  --color-tierra-700: #533d27;
-  --color-tierra-800: #3a2b1b;
-  --color-tierra-900: #291e13;
+  /* --- Madera y tierra: identidad, titulos y botones. --- */
+  --color-tierra-200: #dcc9b6;
+  --color-tierra-300: #c3a68b;
+  --color-tierra-400: #a67c5c;
+  --color-tierra-500: #8c5a3c;
+  --color-tierra-600: #6b4c35;
+  --color-tierra-700: #543826;
+  --color-tierra-800: #43301f;
+  --color-tierra-900: #2c2623;
 
-  /* --- Acentos naturales. Apagados a proposito. --- */
-  --color-salvia-300: #a8b79c;
-  --color-salvia-500: #6f8163;
-  --color-salvia-700: #4a5842;
+  /*
+   * --- Acentos de ciclo ---
+   * Cada ciclo de la escuela elige uno (ciclos.acento). El 500 es el del
+   * lineamiento y va en bordes y puntos; sobre fondo claro no llega al
+   * contraste de texto, para eso esta el 700. El 100 es fondo suave.
+   */
+  --color-salvia-100: #e7ede4;
+  --color-salvia-300: #a9bba6;
+  --color-salvia-500: #5e7a5e;
+  --color-salvia-700: #435a43;
 
-  --color-arcilla-300: #d9a08c;
-  --color-arcilla-500: #b0604a;
-  --color-arcilla-700: #7d4133;
+  --color-ocre-100: #faefdc;
+  --color-ocre-300: #ebc58e;
+  --color-ocre-500: #d99b43;
+  --color-ocre-700: #8a5f1f;
 
-  --color-ocre-300: #e2c68a;
-  --color-ocre-500: #c0912f;
-  --color-ocre-700: #8a6620;
+  --color-arcilla-100: #f6e3dd;
+  --color-arcilla-300: #dca08f;
+  --color-arcilla-500: #b85b43;
+  --color-arcilla-700: #843d2b;
 
   /*
    * --- Semanticos ---
@@ -55,25 +65,30 @@
   --color-superficie: #ffffff;
   --color-borde: var(--color-crema-300);
   --color-texto: var(--color-tierra-900);
-  --color-texto-suave: var(--color-tierra-600);
+  --color-texto-suave: #7a7067;
+  --color-primario: var(--color-tierra-500);
+  --color-primario-oscuro: var(--color-tierra-600);
+  --color-primario-hover: var(--color-tierra-700);
   --color-acento: var(--color-tierra-500);
-  --color-exito: var(--color-salvia-500);
+  --color-dia-activo: #fdf6ec;
+  --color-exito: var(--color-salvia-700);
   --color-atencion: var(--color-ocre-700);
   --color-alerta: var(--color-arcilla-700);
 
   /*
    * --- Tipografia ---
-   * Serif para titulos, con fallback dentro del var(): si la webfont no
-   * carga, `var(--fuente-titulo)` sin fallback invalidaria la declaracion
-   * entera y el titulo saldria en sans.
+   * Serif calida para titulos (Lora) y sans limpia para la interfaz (Plus
+   * Jakarta Sans), las dos del lineamiento. Cada una con fallback DENTRO del
+   * var(): si la webfont no carga, `var(--fuente-titulo)` sin fallback
+   * invalidaria la declaracion entera.
    *
-   * El cuerpo va en fuentes del sistema a proposito: una sola webfont en
-   * toda la app. El usuario tipico esta en un telefono de gama media con
-   * conexion irregular en la costa.
+   * Las dos las sirve next/font desde el propio dominio, con subset latino y
+   * font-display: swap. El texto aparece enseguida en la fuente del sistema
+   * aunque la senal de la costa sea mala.
    */
   --font-titulo: var(--fuente-titulo, Georgia), Georgia, "Times New Roman", serif;
-  --font-cuerpo: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    "Helvetica Neue", sans-serif;
+  --font-cuerpo: var(--fuente-cuerpo, ui-sans-serif), ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
 
   /* --- Formas: esquinas suaves, nada de cantos duros. --- */
   --radius-suave: 0.5rem;
@@ -84,8 +99,15 @@
    * Muy tenues y en marron, no en negro. Una sombra gris sobre crema se ve
    * sucia. Ver "sin sombras duras" en docs/ARCHITECTURE.md.
    */
-  --shadow-reposo: 0 1px 2px rgb(41 30 19 / 0.05);
-  --shadow-elevado: 0 2px 8px rgb(41 30 19 / 0.08);
+  --shadow-reposo: 0 1px 2px rgb(44 38 35 / 0.05);
+  --shadow-elevado: 0 4px 14px rgb(44 38 35 / 0.08);
+
+  --animate-latido: latido 2.4s ease-in-out infinite;
+
+  @keyframes latido {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.35); opacity: 0.55; }
+  }
 }
 
 /*
@@ -94,6 +116,12 @@
  * media con conexion irregular en la costa.
  */
 
+/*
+ * En @layer base y no sueltas: en Tailwind v4 una regla fuera de capa le gana
+ * a cualquier utilidad, y un <h3 class="text-texto-suave"> saldria del color
+ * de los titulos.
+ */
+@layer base {
 html {
   -webkit-text-size-adjust: 100%;
 }
@@ -112,14 +140,64 @@ h2,
 h3,
 h4 {
   font-family: var(--font-titulo);
+  color: var(--color-primario-oscuro);
   line-height: 1.25;
   font-weight: 500;
 }
 
 /* Foco siempre visible: se navega con teclado y con lector de pantalla. */
 :focus-visible {
-  outline: 2px solid var(--color-tierra-500);
+  outline: 2px solid var(--color-primario);
   outline-offset: 2px;
+}
+}
+
+/*
+ * --- Panel lateral ---
+ * Los formularios viven en paneles que se deslizan desde el borde, no fijos
+ * en la pagina (lineamiento, 4.3). Es un <dialog> nativo: trae foco atrapado,
+ * Escape para cerrar y fondo inerte sin una sola dependencia.
+ */
+@layer components {
+dialog.panel-lateral {
+  position: fixed;
+  inset: 0 0 0 auto;
+  margin: 0;
+  width: min(100vw, 30rem);
+  max-width: 100vw;
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 0;
+  border: 0;
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  box-shadow: -8px 0 32px rgb(44 38 35 / 0.12);
+}
+
+dialog.panel-lateral[open] {
+  animation: panel-entra 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+dialog.panel-lateral::backdrop {
+  background: rgb(44 38 35 / 0.35);
+  animation: velo-entra 220ms ease-out;
+}
+
+/* Con un panel abierto, la pagina de atras no se desplaza. */
+html:has(dialog.panel-lateral[open]) {
+  overflow: hidden;
+}
+
+}
+
+@keyframes panel-entra {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes velo-entra {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

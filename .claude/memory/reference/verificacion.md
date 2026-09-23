@@ -44,6 +44,22 @@ npx playwright test
 
 Sin test de aislamiento que cubra las tablas nuevas, la feature **no esta terminada**.
 
+## Ensayar una migracion contra produccion sin tocarla
+
+Sin Docker a mano (el usuario prefiere no probar local), se ensaya asi: la migracion +
+`supabase/verificacion/ritmo-por-nino.sql` en UNA consulta a la API de administracion
+(`POST /v1/projects/{ref}/database/query`), envuelta en `begin ... rollback`. El archivo
+de verificacion no usa metacomandos de psql: cada prueba es un `do $$` que lanza
+`FALLO: ...`, asi que un 201 es "todo paso" y un 400 trae la prueba que fallo. Despues
+se confirma que no quedo nada (`to_regclass` de la tabla nueva es null) y recien ahi
+`npx supabase db push --dry-run` y `db push`.
+
+Escollo al armar la consulta en Node: `texto.replace(a, b)` con `b` como TEXTO
+interpreta `$$` como `$` y rompe todas las funciones. Usar `replace(a, () => b)`.
+
+El token esta en la variable de usuario de Windows `SUPABASE_ACCESS_TOKEN`; en Git Bash
+se lee con `powershell.exe -NoProfile -Command "[Environment]::GetEnvironmentVariable('SUPABASE_ACCESS_TOKEN','User')"`.
+
 ## Continuo
 
 `npm run build`, `npm run typecheck`, y que `grep -rn service_role src/` salga vacio.

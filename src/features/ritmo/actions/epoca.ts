@@ -53,7 +53,7 @@ export async function crearEpoca(
       return {
         ...estadoInicial,
         errores: {
-          inicio: ['Estas fechas se cruzan con otra epoca. Elige otro rango.'],
+          inicio: ['Estas fechas se cruzan con otra época. Elige otro rango.'],
         },
       }
     }
@@ -127,7 +127,7 @@ export async function actualizarEpoca(
   if (!error && (data === null || data.length === 0)) {
     return {
       ...estadoInicial,
-      error: 'No pudimos guardar la epoca. Puede que ya no exista.',
+      error: 'No pudimos guardar la época. Puede que ya no exista.',
     }
   }
 
@@ -136,7 +136,7 @@ export async function actualizarEpoca(
       return {
         ...estadoInicial,
         errores: {
-          inicio: ['Estas fechas se cruzan con otra epoca. Elige otro rango.'],
+          inicio: ['Estas fechas se cruzan con otra época. Elige otro rango.'],
         },
       }
     }

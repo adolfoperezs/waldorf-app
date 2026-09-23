@@ -61,7 +61,7 @@ export function textoEvento(
   return componer(
     negrita(evento.titulo),
     formatearInstante(evento.inicio, escuela.zona_horaria, escuela.idioma),
-    evento.lugar && `Donde: ${evento.lugar}`,
+    evento.lugar && `Dónde: ${evento.lugar}`,
     evento.descripcion,
     evento.requiere_inscripcion && 'Hay que inscribirse.',
     enlace(urlBase, escuela.slug, `/eventos/${evento.id}`),
@@ -91,7 +91,7 @@ export function textoEpoca(
   urlBase: string,
 ): string {
   return componer(
-    negrita(`Epoca: ${epoca.nombre}`),
+    negrita(`Época: ${epoca.nombre}`),
     `${formatearDia(epoca.inicio, escuela.idioma)} a ${formatearDia(
       epoca.fin,
       escuela.idioma,
@@ -129,5 +129,60 @@ export function textoSemana(
     negrita(`${escuela.nombre} — esta semana`),
     lineas.join('\n'),
     enlace(urlBase, escuela.slug, '/calendario'),
+  )
+}
+
+type DiaParaTexto = {
+  nombreDia: string
+  alimento: string | null
+  actividad: string | null
+  materias: string[]
+  nota: string | null
+}
+
+/**
+ * La semana de un grupo, para pegar en el grupo de WhatsApp del curso al
+ * publicarla. Es la "notificacion" del lineamiento (3.2): no mandamos
+ * mensajes, dejamos el texto listo.
+ */
+export function textoRitmoSemanal(
+  {
+    grupo,
+    rangoSemana,
+    modalidad,
+    tema,
+    recordatorio,
+    dias,
+  }: {
+    grupo: string
+    rangoSemana: string
+    modalidad: 'jardin' | 'escolar'
+    tema: string | null
+    recordatorio: string | null
+    dias: DiaParaTexto[]
+  },
+  escuela: Escuela,
+  urlBase: string,
+): string {
+  const lineasDias = dias
+    .filter((d) => d.alimento || d.actividad || d.materias.length || d.nota)
+    .map((d) =>
+      [
+        `${negrita(d.nombreDia)}${d.alimento ? ` · ${d.alimento}` : ''}`,
+        d.actividad,
+        modalidad === 'escolar' && d.materias.length ? d.materias.join(', ') : null,
+        d.nota,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+    )
+
+  return componer(
+    negrita(`Ritmo de la semana — ${grupo}`),
+    `Semana del ${rangoSemana}`,
+    tema && `${modalidad === 'jardin' ? 'Cuento de la semana' : 'Tema de la semana'}: ${tema}`,
+    lineasDias.join('\n\n'),
+    recordatorio && `Recordatorio: ${recordatorio}`,
+    enlace(urlBase, escuela.slug),
   )
 }

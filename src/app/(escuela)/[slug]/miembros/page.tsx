@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import {
   crearInvitacion,
@@ -14,6 +15,7 @@ import {
 import { formatearInstante } from '@/features/ritmo/lib/fechas'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
 import { BotonAccion } from '@/shared/ui/boton-accion'
+import { PanelLateral } from '@/shared/ui/panel-lateral'
 import { Tarjeta } from '@/shared/ui/tarjeta'
 
 export default async function PaginaMiembros({
@@ -62,29 +64,31 @@ export default async function PaginaMiembros({
 
   return (
     <div className="space-y-10">
-      <header className="space-y-1">
-        <h1 className="font-titulo text-3xl text-tierra-800">Miembros</h1>
-        <p className="text-texto-suave">
-          Quienes forman parte de {escuela.nombre} y con que rol.
-        </p>
-      </header>
-
-      <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Invitar a alguien</h2>
-        <p className="text-texto-suave">
-          Se crea un enlace para mandar por WhatsApp. La persona lo abre, crea su
-          cuenta y entra a la escuela con el rol que elijas.
-        </p>
-        <Tarjeta>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="font-titulo text-3xl">Miembros</h1>
+          <p className="text-texto-suave">
+            Quiénes forman parte de {escuela.nombre} y con qué rol. Para sumar una
+            familia con sus niños, usa Familias.
+          </p>
+        </div>
+        <PanelLateral
+          titulo="Invitar a alguien"
+          descripcion="Se crea un enlace para mandar por WhatsApp. La persona lo abre, crea su cuenta y entra con el rol que elijas."
+          disparador={
+            <>
+              <Plus aria-hidden className="size-4" />
+              Invitar a alguien
+            </>
+          }
+        >
           <FormularioInvitacion accion={crearInvitacion.bind(null, ctx)} />
-        </Tarjeta>
-      </section>
+        </PanelLateral>
+      </header>
 
       {pendientes.length > 0 && (
         <section className="space-y-4">
-          <h2 className="font-titulo text-xl text-tierra-700">
-            Invitaciones sin aceptar
-          </h2>
+          <h2 className="font-titulo text-xl">Invitaciones sin aceptar</h2>
           <ul className="space-y-3">
             {pendientes.map((inv) => {
               const caducada = new Date(inv.expira_en).getTime() <= ahora
@@ -97,11 +101,14 @@ export default async function PaginaMiembros({
                         {inv.email ?? 'Cualquiera con el enlace'}
                         {' · '}
                         {caducada
-                          ? 'caducada'
+                          ? 'caducó'
                           : `caduca el ${formatearInstante(inv.expira_en, escuela.zona_horaria, escuela.idioma, { day: 'numeric', month: 'long' })}`}
                       </p>
                     </div>
-                    <BotonAccion accion={revocarInvitacion.bind(null, ctx, inv.id)}>
+                    <BotonAccion
+                      accion={revocarInvitacion.bind(null, ctx, inv.id)}
+                      variante="fantasma"
+                    >
                       Revocar
                     </BotonAccion>
                   </Tarjeta>
@@ -113,7 +120,7 @@ export default async function PaginaMiembros({
       )}
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">
+        <h2 className="font-titulo text-xl">
           {personas.size} {personas.size === 1 ? 'persona' : 'personas'}
         </h2>
         <ul className="space-y-3">
@@ -123,7 +130,7 @@ export default async function PaginaMiembros({
                 <div>
                   <p className="font-medium">
                     {persona.nombre}
-                    {perfilId === user?.id ? ' (tu)' : ''}
+                    {perfilId === user?.id ? ' (tú)' : ''}
                   </p>
                   {persona.email && (
                     <p className="text-sm text-texto-suave">{persona.email}</p>

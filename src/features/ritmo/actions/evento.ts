@@ -70,7 +70,7 @@ export async function alternarInscripcion(
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesion.' }
+  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesión.' }
 
   const { data: existente } = await supabase
     .from('evento_inscripciones')

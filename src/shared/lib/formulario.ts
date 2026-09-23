@@ -1,3 +1,5 @@
+import type { z } from 'zod'
+
 /**
  * Forma comun de retorno de las server actions, para `useActionState`.
  *
@@ -15,3 +17,19 @@ export type EstadoFormulario = {
 }
 
 export const estadoInicial: EstadoFormulario = { ok: false }
+
+/**
+ * Errores de Zod por ruta completa: `ninos.0.nombre` y no solo `ninos`.
+ *
+ * `z.flattenError` solo conoce el primer nivel, y un formulario con una
+ * lista (los hijos de una familia) necesita marcar el campo exacto. En un
+ * formulario plano da lo mismo que flattenError.
+ */
+export function erroresPorRuta(error: z.ZodError): Record<string, string[]> {
+  const errores: Record<string, string[]> = {}
+  for (const issue of error.issues) {
+    const ruta = issue.path.join('.') || '_'
+    ;(errores[ruta] ??= []).push(issue.message)
+  }
+  return errores
+}

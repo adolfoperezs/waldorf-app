@@ -22,25 +22,25 @@ export const ROLES_INVITABLES = [
 ] as const satisfies readonly Rol[]
 
 export const NOMBRE_ROL: Record<Rol, string> = {
-  administracion: 'Administracion',
+  administracion: 'Administración',
   colegio_maestros: 'Colegio de maestros',
-  maestro_guia: 'Maestro guia',
+  maestro_guia: 'Maestro guía',
   maestro_especialidad: 'Maestro de especialidad',
-  comision: 'Comision',
+  comision: 'Comisión',
   familia: 'Familia',
 }
 
 export const DESCRIPCION_ROL: Record<Rol, string> = {
   familia:
-    'Ve el calendario y los encuentros. Vera a sus hijos cuando se la vincule a su familia.',
+    'Ve el calendario y los encuentros. Verá a sus hijos cuando se la vincule a su familia.',
   maestro_guia:
-    'Ve el calendario. Vera a los ninos de su grupo cuando se la asigne a uno.',
+    'Ve el calendario. Verá a los niños de su grupo cuando se la asigne a uno.',
   maestro_especialidad:
-    'Ve el calendario. Vera a los ninos de los grupos donde ensena cuando se la asigne.',
+    'Ve el calendario. Verá a los niños de los grupos donde enseña cuando se la asigne.',
   colegio_maestros:
-    'Configura el ritmo del anio: anios, epocas, festividades, encuentros y minuta.',
+    'Configura el ritmo del año: años, épocas, festividades, encuentros y minuta.',
   comision:
-    'Ve el calendario. Gestiona campanas cuando se la sume a una comision.',
+    'Ve el calendario. Gestiona campañas cuando se la sume a una comisión.',
   administracion:
-    'Todo: configuracion, miembros, familias y aportes. Darla con cuidado.',
+    'Todo: configuración, miembros, familias y aportes. Darla con cuidado.',
 }

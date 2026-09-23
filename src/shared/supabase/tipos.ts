@@ -367,6 +367,47 @@ export type Database = {
           },
         ]
       }
+      ciclos: {
+        Row: {
+          acento: string
+          created_at: string
+          escuela_id: string
+          id: string
+          modalidad: Database["public"]["Enums"]["modalidad_ciclo"]
+          nombre: string
+          orden: number
+          updated_at: string
+        }
+        Insert: {
+          acento?: string
+          created_at?: string
+          escuela_id: string
+          id?: string
+          modalidad: Database["public"]["Enums"]["modalidad_ciclo"]
+          nombre: string
+          orden?: number
+          updated_at?: string
+        }
+        Update: {
+          acento?: string
+          created_at?: string
+          escuela_id?: string
+          id?: string
+          modalidad?: Database["public"]["Enums"]["modalidad_ciclo"]
+          nombre?: string
+          orden?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ciclos_escuela_id_fkey"
+            columns: ["escuela_id"]
+            isOneToOne: false
+            referencedRelation: "escuelas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       comision_miembros: {
         Row: {
           comision_id: string
@@ -908,9 +949,9 @@ export type Database = {
         Row: {
           activo: boolean
           anio_cohorte: number
+          ciclo_id: string | null
           created_at: string
           escuela_id: string
-          etapa: string | null
           id: string
           nombre: string
           updated_at: string
@@ -918,9 +959,9 @@ export type Database = {
         Insert: {
           activo?: boolean
           anio_cohorte: number
+          ciclo_id?: string | null
           created_at?: string
           escuela_id: string
-          etapa?: string | null
           id?: string
           nombre: string
           updated_at?: string
@@ -928,14 +969,21 @@ export type Database = {
         Update: {
           activo?: boolean
           anio_cohorte?: number
+          ciclo_id?: string | null
           created_at?: string
           escuela_id?: string
-          etapa?: string | null
           id?: string
           nombre?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "grupos_ciclo_fk"
+            columns: ["ciclo_id", "escuela_id"]
+            isOneToOne: false
+            referencedRelation: "ciclos"
+            referencedColumns: ["id", "escuela_id"]
+          },
           {
             foreignKeyName: "grupos_escuela_id_fkey"
             columns: ["escuela_id"]
@@ -954,6 +1002,7 @@ export type Database = {
           email: string | null
           escuela_id: string
           expira_en: string
+          familia_id: string | null
           id: string
           revocada_en: string | null
           rol: Database["public"]["Enums"]["rol_escuela"]
@@ -968,6 +1017,7 @@ export type Database = {
           email?: string | null
           escuela_id: string
           expira_en?: string
+          familia_id?: string | null
           id?: string
           revocada_en?: string | null
           rol: Database["public"]["Enums"]["rol_escuela"]
@@ -982,6 +1032,7 @@ export type Database = {
           email?: string | null
           escuela_id?: string
           expira_en?: string
+          familia_id?: string | null
           id?: string
           revocada_en?: string | null
           rol?: Database["public"]["Enums"]["rol_escuela"]
@@ -1009,6 +1060,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "escuelas"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitaciones_familia_fk"
+            columns: ["familia_id", "escuela_id"]
+            isOneToOne: false
+            referencedRelation: "familias"
+            referencedColumns: ["id", "escuela_id"]
           },
         ]
       }
@@ -1205,6 +1263,121 @@ export type Database = {
         }
         Relationships: []
       }
+      ritmo_dias: {
+        Row: {
+          actividad: string | null
+          alimento: string | null
+          created_at: string
+          dia_semana: number
+          escuela_id: string
+          id: string
+          materias: string[]
+          nota: string | null
+          ritmo_id: string
+          updated_at: string
+        }
+        Insert: {
+          actividad?: string | null
+          alimento?: string | null
+          created_at?: string
+          dia_semana: number
+          escuela_id: string
+          id?: string
+          materias?: string[]
+          nota?: string | null
+          ritmo_id: string
+          updated_at?: string
+        }
+        Update: {
+          actividad?: string | null
+          alimento?: string | null
+          created_at?: string
+          dia_semana?: number
+          escuela_id?: string
+          id?: string
+          materias?: string[]
+          nota?: string | null
+          ritmo_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ritmo_dias_escuela_id_fkey"
+            columns: ["escuela_id"]
+            isOneToOne: false
+            referencedRelation: "escuelas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ritmo_dias_ritmo_id_escuela_id_fkey"
+            columns: ["ritmo_id", "escuela_id"]
+            isOneToOne: false
+            referencedRelation: "ritmos_semanales"
+            referencedColumns: ["id", "escuela_id"]
+          },
+        ]
+      }
+      ritmos_semanales: {
+        Row: {
+          created_at: string
+          escuela_id: string
+          grupo_id: string
+          id: string
+          publicado_en: string | null
+          publicado_por: string | null
+          recordatorio: string | null
+          semana: string
+          tema: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          escuela_id: string
+          grupo_id: string
+          id?: string
+          publicado_en?: string | null
+          publicado_por?: string | null
+          recordatorio?: string | null
+          semana: string
+          tema?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          escuela_id?: string
+          grupo_id?: string
+          id?: string
+          publicado_en?: string | null
+          publicado_por?: string | null
+          recordatorio?: string | null
+          semana?: string
+          tema?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ritmos_semanales_escuela_id_fkey"
+            columns: ["escuela_id"]
+            isOneToOne: false
+            referencedRelation: "escuelas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ritmos_semanales_grupo_id_escuela_id_fkey"
+            columns: ["grupo_id", "escuela_id"]
+            isOneToOne: false
+            referencedRelation: "grupos"
+            referencedColumns: ["id", "escuela_id"]
+          },
+          {
+            foreignKeyName: "ritmos_semanales_publicado_por_fkey"
+            columns: ["publicado_por"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tramos_aporte: {
         Row: {
           anio_id: string
@@ -1276,6 +1449,36 @@ export type Database = {
         Args: { p_anio: string; p_plantilla: Json }
         Returns: undefined
       }
+      ninos_de_escuela: {
+        Args: { p_escuela: string }
+        Returns: {
+          apellidos: string
+          familia_id: string
+          fecha_nacimiento: string
+          grupo_id: string
+          id: string
+          nombre: string
+          nombre_preferido: string
+        }[]
+      }
+      ninos_de_mi_familia: {
+        Args: { p_escuela: string }
+        Returns: {
+          grupo_id: string
+          id: string
+          nombre: string
+        }[]
+      }
+      sumar_familia: {
+        Args: {
+          p_email?: string
+          p_escuela: string
+          p_ninos: Json
+          p_nombre: string
+          p_token_hash: string
+        }
+        Returns: string
+      }
       ver_invitacion: {
         Args: { p_token: string }
         Returns: {
@@ -1283,6 +1486,7 @@ export type Database = {
           escuela_nombre: string
           escuela_slug: string
           estado: string
+          familia_nombre: string
           requiere_correo: boolean
           rol: Database["public"]["Enums"]["rol_escuela"]
         }[]
@@ -1290,6 +1494,7 @@ export type Database = {
     }
     Enums: {
       estado_aporte: "registrado" | "confirmado" | "anulado"
+      modalidad_ciclo: "jardin" | "escolar"
       moneda_aporte: "dinero" | "horas"
       rol_escuela:
         | "administracion"
@@ -1438,6 +1643,7 @@ export const Constants = {
   public: {
     Enums: {
       estado_aporte: ["registrado", "confirmado", "anulado"],
+      modalidad_ciclo: ["jardin", "escolar"],
       moneda_aporte: ["dinero", "horas"],
       rol_escuela: [
         "administracion",

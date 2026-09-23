@@ -11,12 +11,12 @@ export default async function PaginaLogin({
 
   return (
     <div className="space-y-6">
-      <h1 className="font-titulo text-2xl text-tierra-800">Entrar</h1>
+      <h1 className="font-titulo text-2xl text-primario-oscuro">Entrar</h1>
 
       <FormularioLogin volver={volver} />
 
       <p className="text-sm text-texto-suave">
-        Todavia no tienes cuenta?{' '}
+        ¿Todavía no tienes cuenta?{' '}
         <Link href={`/signup${conVolver}`} className="text-acento underline">
           Crear una
         </Link>

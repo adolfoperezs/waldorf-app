@@ -27,6 +27,31 @@ export const plantillaSchema = z.object({
     z.object({ nombre: z.string(), descripcion: z.string().optional() }),
   ),
 
+  /**
+   * Etapas de la escuela y sus grupos (0007). `modalidad` es estructural;
+   * nombre y acento son de cada escuela. Un grupo apunta a su ciclo por
+   * nombre, y su cohorte se calcula al cargarlo: anio base - desfase.
+   */
+  ciclos: z
+    .array(
+      z.object({
+        orden: z.number().int(),
+        nombre: z.string(),
+        modalidad: z.enum(['jardin', 'escolar']),
+        acento: z.enum(['salvia', 'ocre', 'arcilla', 'tierra']),
+      }),
+    )
+    .default([]),
+  grupos: z
+    .array(
+      z.object({
+        nombre: z.string(),
+        ciclo: z.string(),
+        desfase_cohorte: z.number().int().min(0),
+      }),
+    )
+    .default([]),
+
   /** Se materializan al crear el ano escolar, en la Fase 1. */
   epocas: z.array(
     z.object({ orden: z.number().int(), nombre: z.string(), semanas: z.number().int() }),

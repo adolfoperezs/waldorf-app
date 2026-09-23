@@ -13,11 +13,11 @@ export default async function Inicio() {
   if (!user) {
     return (
       <div className="space-y-6">
-        <h1 className="font-titulo text-3xl text-tierra-800">
-          Gestion para escuelas Waldorf
+        <h1 className="font-titulo text-3xl text-primario-oscuro">
+          Gestión para escuelas Waldorf
         </h1>
         <p className="text-texto-suave">
-          El ritmo del ano, las familias, los aportes y las comisiones en un
+          El ritmo del año, las familias, los aportes y las comisiones en un
           solo lugar.
         </p>
         <div className="flex flex-wrap gap-3">
@@ -39,8 +39,8 @@ export default async function Inicio() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-titulo text-2xl text-tierra-800">
-        {escuelas.length ? 'Tus escuelas' : 'Todavia no tienes escuelas'}
+      <h1 className="font-titulo text-2xl text-primario-oscuro">
+        {escuelas.length ? 'Tus escuelas' : 'Todavía no tienes escuelas'}
       </h1>
 
       {escuelas.length > 0 && (
@@ -60,7 +60,7 @@ export default async function Inicio() {
 
       {escuelas.length === 0 && (
         <p className="text-texto-suave">
-          Si una escuela te invito, abre el enlace que te mandaron.
+          Si una escuela te invitó, abre el enlace que te mandaron.
         </p>
       )}
 

@@ -1,66 +1,54 @@
 {
   "id": "kimun-cl",
   "nombre": "Escuela Waldorf chilena (hemisferio sur)",
-  "descripcion": "Plantilla base modelada sobre la Escuela Waldorf Kimun, Algarrobo. Una escuela nueva la clona en el onboarding y la ajusta. Nada de esto es constante en el codigo: ver CLAUDE.md, regla 6.",
+  "descripcion": "Plantilla base modelada sobre la Escuela Waldorf Kimün, Algarrobo. Una escuela nueva la clona en el onboarding y la ajusta. Nada de esto es constante en el código: ver CLAUDE.md, regla 6.",
   "pais": "CL",
   "hemisferio": "sur",
   "idioma": "es",
   "moneda": "CLP",
 
   "comisiones": [
-    { "nombre": "Economia", "descripcion": "Aportes, presupuesto y proyeccion." },
+    { "nombre": "Economía", "descripcion": "Aportes, presupuesto y proyección." },
     { "nombre": "Huerto", "descripcion": "Huerta, compost y ciclo de la tierra." },
-    { "nombre": "Construccion", "descripcion": "Mantencion y obras de la escuela." },
-    { "nombre": "Festividades", "descripcion": "Preparacion de las fiestas del ano." },
+    { "nombre": "Construcción", "descripcion": "Mantención y obras de la escuela." },
+    { "nombre": "Festividades", "descripcion": "Preparación de las fiestas del año." },
     { "nombre": "Cultura", "descripcion": "Talleres, biblioteca y vida cultural." }
   ],
 
+  "ciclos": [
+    { "orden": 1, "nombre": "Grupo Semilla", "modalidad": "jardin", "acento": "salvia" },
+    { "orden": 2, "nombre": "Básica", "modalidad": "escolar", "acento": "ocre" },
+    { "orden": 3, "nombre": "Media", "modalidad": "escolar", "acento": "arcilla" }
+  ],
+
+  "grupos": [
+    { "nombre": "Grupo Semilla", "ciclo": "Grupo Semilla", "desfase_cohorte": 0 },
+    { "nombre": "1° básico", "ciclo": "Básica", "desfase_cohorte": 0 },
+    { "nombre": "2° básico", "ciclo": "Básica", "desfase_cohorte": 1 },
+    { "nombre": "3° básico", "ciclo": "Básica", "desfase_cohorte": 2 },
+    { "nombre": "4° básico", "ciclo": "Básica", "desfase_cohorte": 3 },
+    { "nombre": "5° básico", "ciclo": "Básica", "desfase_cohorte": 4 },
+    { "nombre": "6° básico", "ciclo": "Básica", "desfase_cohorte": 5 },
+    { "nombre": "7° básico", "ciclo": "Básica", "desfase_cohorte": 6 },
+    { "nombre": "8° básico", "ciclo": "Básica", "desfase_cohorte": 7 }
+  ],
+
   "epocas": [
-    { "orden": 1, "nombre": "Numeros y ritmo", "semanas": 4 },
+    { "orden": 1, "nombre": "Números y ritmo", "semanas": 4 },
     { "orden": 2, "nombre": "Lengua materna", "semanas": 4 },
     { "orden": 3, "nombre": "Formas", "semanas": 3 },
     { "orden": 4, "nombre": "Naturaleza", "semanas": 4 },
     { "orden": 5, "nombre": "Historias y leyendas", "semanas": 4 },
-    { "orden": 6, "nombre": "Medida y proporcion", "semanas": 3 }
+    { "orden": 6, "nombre": "Medida y proporción", "semanas": 3 }
   ],
 
   "festividades": [
-    {
-      "nombre": "Fiesta de la primavera",
-      "mes": 9,
-      "dia": 21,
-      "descripcion": "Equinoccio de primavera en el hemisferio sur."
-    },
-    {
-      "nombre": "San Miguel",
-      "mes": 9,
-      "dia": 29,
-      "descripcion": "El valor y la fuerza interior. Cae en primavera en el sur."
-    },
-    {
-      "nombre": "Martinmas",
-      "mes": 11,
-      "dia": 11,
-      "descripcion": "Fiesta de los faroles y de la luz que se comparte."
-    },
-    {
-      "nombre": "Adviento",
-      "mes": 12,
-      "dia": 1,
-      "descripcion": "Espiral de adviento. En el sur cae en verano."
-    },
-    {
-      "nombre": "San Juan",
-      "mes": 6,
-      "dia": 24,
-      "descripcion": "Fuego de invierno en el hemisferio sur. En Europa es fiesta de verano: por esto el hemisferio es un dato de la escuela y no una constante."
-    },
-    {
-      "nombre": "Pascua de Resurreccion",
-      "mes": 4,
-      "dia": 5,
-      "descripcion": "Fecha movil. Se ajusta cada ano al calendario."
-    }
+    { "nombre": "Fiesta de la primavera", "mes": 9, "dia": 21, "descripcion": "Equinoccio de primavera en el hemisferio sur." },
+    { "nombre": "San Miguel", "mes": 9, "dia": 29, "descripcion": "El valor y la fuerza interior. Cae en primavera en el sur." },
+    { "nombre": "Martinmas", "mes": 11, "dia": 11, "descripcion": "Fiesta de los faroles y de la luz que se comparte." },
+    { "nombre": "Adviento", "mes": 12, "dia": 1, "descripcion": "Espiral de adviento. En el sur cae en verano." },
+    { "nombre": "San Juan", "mes": 6, "dia": 24, "descripcion": "Fuego de invierno en el hemisferio sur. En Europa es fiesta de verano: por eso el hemisferio es un dato de la escuela y no una constante." },
+    { "nombre": "Pascua de Resurrección", "mes": 4, "dia": 5, "descripcion": "Fecha móvil. Se ajusta cada año al calendario." }
   ],
 
   "tramos_aporte": [
@@ -72,9 +60,9 @@
   ],
 
   "minuta": [
-    { "dia_semana": 1, "plato": "Arroz", "notas": "Lunes, cereal del dia: arroz." },
+    { "dia_semana": 1, "plato": "Arroz", "notas": "Lunes, cereal del día: arroz." },
     { "dia_semana": 2, "plato": "Legumbres", "notas": "Martes." },
-    { "dia_semana": 3, "plato": "Mijo", "notas": "Miercoles." },
+    { "dia_semana": 3, "plato": "Mijo", "notas": "Miércoles." },
     { "dia_semana": 4, "plato": "Centeno", "notas": "Jueves." },
     { "dia_semana": 5, "plato": "Avena", "notas": "Viernes." }
   ]

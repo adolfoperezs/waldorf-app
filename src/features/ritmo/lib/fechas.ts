@@ -110,21 +110,49 @@ export function dentroDe(dia: FechaSola, inicio: FechaSola, fin: FechaSola) {
   return dia >= inicio && dia <= fin
 }
 
+/** Dia de la semana (1 = lunes, 7 = domingo) de un dia del calendario. */
+export function diaSemanaDe(fecha: FechaSola): number {
+  const dia = comoDiaUtc(fecha).getUTCDay()
+  return dia === 0 ? 7 : dia // Postgres y la minuta usan 1=lunes, 7=domingo.
+}
+
 /** Dia de la semana (1 = lunes) de hoy en la escuela, para la minuta. */
 export function diaSemanaEnEscuela(zonaHoraria: string): number {
-  const dia = new Date(`${hoyEnEscuela(zonaHoraria)}T12:00:00Z`).getUTCDay()
-  return dia === 0 ? 7 : dia // Postgres y la minuta usan 1=lunes, 7=domingo.
+  return diaSemanaDe(hoyEnEscuela(zonaHoraria))
+}
+
+/** Suma (o resta) dias a un dia del calendario. Sin zonas: aritmetica en UTC. */
+export function sumarDias(fecha: FechaSola, dias: number): FechaSola {
+  const d = comoDiaUtc(fecha)
+  d.setUTCDate(d.getUTCDate() + dias)
+  return d.toISOString().slice(0, 10)
+}
+
+/** El lunes de la semana de `fecha`. Es la clave de ritmos_semanales. */
+export function lunesDe(fecha: FechaSola): FechaSola {
+  return sumarDias(fecha, 1 - diaSemanaDe(fecha))
+}
+
+/**
+ * La semana que le interesa a una familia hoy: la actual de lunes a viernes,
+ * y la siguiente desde el sabado, que es cuando se prepara el lunes.
+ */
+export function semanaVisible(hoy: FechaSola): FechaSola {
+  return diaSemanaDe(hoy) >= 6 ? sumarDias(lunesDe(hoy), 7) : lunesDe(hoy)
 }
 
 export const NOMBRE_DIA = [
   'Lunes',
   'Martes',
-  'Miercoles',
+  'Miércoles',
   'Jueves',
   'Viernes',
-  'Sabado',
+  'Sábado',
   'Domingo',
 ] as const
+
+/** Los dias con clases que muestra el ritmo semanal: lunes a viernes. */
+export const DIAS_DE_CLASE = [1, 2, 3, 4, 5] as const
 
 /**
  * Convierte fecha y hora LOCALES DE LA ESCUELA en un instante UTC.
@@ -154,4 +182,30 @@ export function instanteEnZona(
   const desfase = etiqueta.replace('GMT', '') || '+00:00'
 
   return new Date(`${fecha}T${horaCompleta}${desfase}`).toISOString()
+}
+
+/** Dias entre dos dias del calendario (b - a). */
+export function diasEntre(a: FechaSola, b: FechaSola): number {
+  return Math.round((comoDiaUtc(b).getTime() - comoDiaUtc(a).getTime()) / 86_400_000)
+}
+
+/**
+ * En que semana va una epoca: "semana 2 de 4". La barra de avance del banner
+ * de la familia (lineamiento, 3.1). Semanas de calendario desde el inicio.
+ */
+export function avanceDeEpoca(inicio: FechaSola, fin: FechaSola, hoy: FechaSola) {
+  const semanas = Math.max(1, Math.ceil((diasEntre(inicio, fin) + 1) / 7))
+  const semana = Math.min(semanas, Math.max(1, Math.floor(diasEntre(inicio, hoy) / 7) + 1))
+  const fraccion = Math.min(1, Math.max(0, (diasEntre(inicio, hoy) + 1) / (diasEntre(inicio, fin) + 1)))
+  return { semana, semanas, fraccion }
+}
+
+/** "21 al 25 de septiembre", o "29 de septiembre al 3 de octubre". */
+export function formatearSemana(lunes: FechaSola, idioma = 'es'): string {
+  const viernes = sumarDias(lunes, 4)
+  const mismoMes = lunes.slice(0, 7) === viernes.slice(0, 7)
+  const inicio = mismoMes
+    ? formatearDia(lunes, idioma, { day: 'numeric' })
+    : formatearDia(lunes, idioma, { day: 'numeric', month: 'long' })
+  return `${inicio} al ${formatearDia(viernes, idioma, { day: 'numeric', month: 'long' })}`
 }

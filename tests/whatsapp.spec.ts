@@ -42,7 +42,7 @@ test('el evento sale en la hora de la escuela, no en UTC', () => {
 
   expect(texto).toContain('*Jornada de huerto*')
   expect(texto).toContain('10:00')
-  expect(texto).toContain('La huerta')
+  expect(texto).toContain('Dónde: La huerta')
   expect(texto).toContain('Traer guantes.')
   expect(texto).toContain('Hay que inscribirse.')
   expect(texto).toContain('https://waldorf.example/kimun/eventos/e1')
@@ -65,7 +65,7 @@ test('omite las partes que no existen, sin dejar huecos', () => {
     URL,
   )
 
-  expect(texto).not.toContain('Donde:')
+  expect(texto).not.toContain('Dónde:')
   expect(texto).not.toContain('Hay que inscribirse')
   expect(texto).not.toMatch(/\n\n\n/)
 })
@@ -87,7 +87,7 @@ test('una festividad no se corre de dia por la zona horaria', () => {
 test('la epoca muestra su rango completo', () => {
   const texto = textoEpoca(
     {
-      nombre: 'Numeros y ritmo',
+      nombre: 'Números y ritmo',
       tema: 'Las cuatro operaciones',
       inicio: '2026-03-01',
       fin: '2026-03-28',
@@ -96,10 +96,11 @@ test('la epoca muestra su rango completo', () => {
     URL,
   )
 
-  expect(texto).toContain('*Epoca: Numeros y ritmo*')
+  expect(texto).toContain('*Época: Números y ritmo*')
   expect(texto).toContain('1 de marzo')
   expect(texto).toContain('28 de marzo')
   expect(texto).toContain('Las cuatro operaciones')
+  expect(texto).toContain('https://waldorf.example/kimun/calendario')
 })
 
 test('el resumen de la semana lista los encuentros', () => {

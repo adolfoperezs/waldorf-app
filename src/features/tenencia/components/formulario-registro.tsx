@@ -42,7 +42,7 @@ export function FormularioRegistro({ volver }: { volver?: string }) {
 
       <Campo
         id="password"
-        etiqueta="Contrasena"
+        etiqueta="Contraseña"
         type="password"
         autoComplete="new-password"
         ayuda="Al menos 10 caracteres. Mejor una frase que recuerdes."

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { diaSemanaDe } from '../lib/fechas'
 
 /**
  * Validacion en el borde de las server actions del ritmo.
@@ -17,13 +18,13 @@ export const anioSchema = z
     nombre: z
       .string()
       .trim()
-      .min(1, 'Ponle un nombre al anio, como "2026"')
+      .min(1, 'Ponle un nombre al año, como "2026"')
       .max(60, 'El nombre es demasiado largo'),
     inicio: fecha,
     fin: fecha,
   })
   .refine((d) => d.fin > d.inicio, {
-    error: 'El anio tiene que terminar despues de empezar',
+    error: 'El año tiene que terminar después de empezar',
     path: ['fin'],
   })
 
@@ -35,7 +36,7 @@ export const epocaSchema = z
     nombre: z
       .string()
       .trim()
-      .min(2, 'Ponle un nombre a la epoca')
+      .min(2, 'Ponle un nombre a la época')
       .max(120, 'El nombre es demasiado largo'),
     tema: z.string().trim().max(500).optional(),
     orden: z.coerce.number().int().min(1).max(99),
@@ -43,7 +44,7 @@ export const epocaSchema = z
     fin: fecha,
   })
   .refine(rango, {
-    error: 'La epoca tiene que terminar el mismo dia o despues de empezar',
+    error: 'La época tiene que terminar el mismo día o después de empezar',
     path: ['fin'],
   })
 
@@ -66,14 +67,14 @@ export const NOMBRE_TIPO_EVENTO: Record<(typeof TIPOS_EVENTO)[number], string> =
   asamblea: 'Asamblea',
   encuentro_1a1: 'Encuentro uno a uno',
   taller: 'Taller',
-  reunion_comision: 'Reunion de comision',
+  reunion_comision: 'Reunión de comisión',
   festividad: 'Festividad',
   otro: 'Otro',
 }
 
 export const eventoSchema = z.object({
   tipo: z.enum(TIPOS_EVENTO, { error: 'Elige el tipo de encuentro' }),
-  titulo: z.string().trim().min(2, 'Ponle un titulo').max(200),
+  titulo: z.string().trim().min(2, 'Ponle un título').max(200),
   descripcion: z.string().trim().max(2000).optional(),
   lugar: z.string().trim().max(200).optional(),
   /** Fecha y hora locales de la escuela; se convierten en la server action. */
@@ -95,3 +96,43 @@ export const minutaSchema = z.object({
 export type NuevoAnio = z.infer<typeof anioSchema>
 export type NuevaEpoca = z.infer<typeof epocaSchema>
 export type NuevoEvento = z.infer<typeof eventoSchema>
+
+// ---------------------------------------------------------------------
+// Ritmo semanal de un grupo (0007)
+// ---------------------------------------------------------------------
+
+/** Los datos de la ruta que viajan ligados a la accion. Se validan igual. */
+export const semanaDeGrupoSchema = z.object({
+  grupoId: z.uuid(),
+  semana: z.iso.date().refine((f) => diaSemanaDe(f) === 1, 'La semana empieza en lunes'),
+})
+
+const textoOpcional = (max: number, mensaje: string) =>
+  z.string().trim().max(max, mensaje).optional()
+
+export const semanaSchema = z.object({
+  tema: textoOpcional(300, 'El tema es demasiado largo'),
+  recordatorio: textoOpcional(1000, 'El recordatorio es demasiado largo'),
+})
+
+export const diaRitmoSchema = z.object({
+  dia: z.coerce.number().int().min(1).max(7),
+  actividad: textoOpcional(500, 'Demasiado largo'),
+  /** Se escriben separadas por comas; en la base son un arreglo. */
+  materias: z
+    .string()
+    .optional()
+    .transform((texto) =>
+      (texto ?? '')
+        .split(/[,\n]/)
+        .map((materia) => materia.trim())
+        .filter(Boolean),
+    )
+    .pipe(
+      z
+        .array(z.string().max(60, 'Cada materia en pocas palabras'))
+        .max(12, 'Hasta 12 materias por día'),
+    ),
+  alimento: textoOpcional(200, 'Demasiado largo'),
+  nota: textoOpcional(1000, 'La nota es demasiado larga'),
+})

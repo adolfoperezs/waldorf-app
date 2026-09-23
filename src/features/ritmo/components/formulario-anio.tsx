@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 import { BotonEnvio } from '@/shared/ui/boton-envio'
 import { Campo } from '@/shared/ui/campo'
+import { useCerrarAlCompletar } from '@/shared/ui/panel-lateral'
 
 type Accion = (
   previo: EstadoFormulario,
@@ -12,12 +13,13 @@ type Accion = (
 
 export function FormularioAnio({ accion }: { accion: Accion }) {
   const [estado, enviar] = useActionState(accion, estadoInicial)
+  useCerrarAlCompletar(estado)
 
   return (
     <form action={enviar} className="space-y-5">
       <Campo
         id="nombre"
-        etiqueta="Nombre del anio"
+        etiqueta="Nombre del año"
         placeholder="2026"
         required
         errores={estado.errores?.nombre}
@@ -26,14 +28,14 @@ export function FormularioAnio({ accion }: { accion: Accion }) {
       <div className="grid gap-5 sm:grid-cols-2">
         <Campo
           id="inicio"
-          etiqueta="Primer dia"
+          etiqueta="Primer día"
           type="date"
           required
           errores={estado.errores?.inicio}
         />
         <Campo
           id="fin"
-          etiqueta="Ultimo dia"
+          etiqueta="Último día"
           type="date"
           required
           errores={estado.errores?.fin}
@@ -46,7 +48,7 @@ export function FormularioAnio({ accion }: { accion: Accion }) {
         </p>
       )}
 
-      <BotonEnvio esperando="Creando...">Crear anio</BotonEnvio>
+      <BotonEnvio esperando="Creando...">Crear el año</BotonEnvio>
     </form>
   )
 }

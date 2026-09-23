@@ -1,13 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { z } from 'zod'
 import { mensajeDeError } from '@/shared/lib/errores-postgres'
 import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 import { crearClienteServidor } from '@/shared/supabase/cliente-servidor'
 import { FORMATO_CODIGO, generarCodigo } from '../lib/invitacion'
+import { origen } from '../lib/origen'
 import { NOMBRE_ROL } from '../lib/roles'
 import { textoInvitacion } from '../lib/texto-invitacion'
 import { invitacionSchema } from '../schemas/invitacion'
@@ -18,17 +18,6 @@ export type EstadoInvitacion = EstadoFormulario & {
   /** El enlace se devuelve UNA vez: la base solo guarda su huella. */
   enlace?: string
   texto?: string
-}
-
-/** Origen publico del sitio, para armar el enlace. */
-async function origen(): Promise<string> {
-  const configurado = process.env.NEXT_PUBLIC_SITE_URL
-  if (configurado) return configurado.replace(/\/$/, '')
-
-  const h = await headers()
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'localhost:3000'
-  const protocolo = h.get('x-forwarded-proto') ?? 'https'
-  return `${protocolo}://${host}`
 }
 
 /**
@@ -57,7 +46,7 @@ export async function crearInvitacion(
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesion.' }
+  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesión.' }
 
   const { codigo, huella } = generarCodigo()
 
@@ -109,10 +98,11 @@ export async function revocarInvitacion(
 
   if (error) return { ...estadoInicial, error: mensajeDeError(error.code) }
   if (!data?.length) {
-    return { ...estadoInicial, error: 'Esa invitacion ya se uso o ya estaba revocada.' }
+    return { ...estadoInicial, error: 'Esa invitación ya se usó o ya estaba revocada.' }
   }
 
-  revalidatePath(`/${ctx.slug}/miembros`)
+  // Layout y no solo /miembros: las invitaciones de familia viven en /familias.
+  revalidatePath(`/${ctx.slug}`, 'layout')
   return { ok: true }
 }
 
@@ -133,7 +123,7 @@ export async function quitarMiembro(
   const {
     data: { user },
   } = await supabase.auth.getUser()
-  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesion.' }
+  if (!user) return { ...estadoInicial, error: 'Necesitas iniciar sesión.' }
 
   const { data, error } = await supabase
     .from('membresias')
@@ -144,7 +134,7 @@ export async function quitarMiembro(
 
   if (error) return { ...estadoInicial, error: mensajeDeError(error.code) }
   if (!data?.length) {
-    return { ...estadoInicial, error: 'No se puede quitar esa membresia.' }
+    return { ...estadoInicial, error: 'No se puede quitar esa membresía.' }
   }
 
   revalidatePath(`/${ctx.slug}/miembros`)
@@ -162,7 +152,7 @@ export async function aceptarInvitacion(
   _formData: FormData,
 ): Promise<EstadoFormulario> {
   if (!FORMATO_CODIGO.test(codigo)) {
-    return { ...estadoInicial, error: 'Este enlace no es valido.' }
+    return { ...estadoInicial, error: 'Este enlace no es válido.' }
   }
 
   const supabase = await crearClienteServidor()
@@ -174,13 +164,13 @@ export async function aceptarInvitacion(
     if (error.code === 'P0002') {
       return {
         ...estadoInicial,
-        error: 'Esta invitacion ya no sirve: se uso, caduco o la revocaron. Pide un enlace nuevo.',
+        error: 'Esta invitación ya no sirve: se usó, caducó o la revocaron. Pide un enlace nuevo.',
       }
     }
     if (error.code === '42501') {
       return {
         ...estadoInicial,
-        error: 'Esta invitacion es para otra direccion de correo.',
+        error: 'Esta invitación es para otra dirección de correo.',
       }
     }
     return { ...estadoInicial, error: mensajeDeError(error.code) }

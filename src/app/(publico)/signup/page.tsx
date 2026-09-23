@@ -11,12 +11,12 @@ export default async function PaginaRegistro({
 
   return (
     <div className="space-y-6">
-      <h1 className="font-titulo text-2xl text-tierra-800">Crear cuenta</h1>
+      <h1 className="font-titulo text-2xl text-primario-oscuro">Crear cuenta</h1>
 
       <FormularioRegistro volver={volver} />
 
       <p className="text-sm text-texto-suave">
-        Ya tienes cuenta?{' '}
+        ¿Ya tienes cuenta?{' '}
         <Link href={`/login${conVolver}`} className="text-acento underline">
           Entrar
         </Link>

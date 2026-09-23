@@ -49,7 +49,7 @@ export default async function PaginaEvento({
     <div className="space-y-8">
       <header className="space-y-2">
         <p className="text-sm text-texto-suave">{NOMBRE_TIPO_EVENTO[evento.tipo]}</p>
-        <h1 className="font-titulo text-3xl text-tierra-800">{evento.titulo}</h1>
+        <h1 className="font-titulo text-3xl text-primario-oscuro">{evento.titulo}</h1>
         <p className="text-texto-suave">
           {formatearInstante(evento.inicio, escuela.zona_horaria, escuela.idioma)}
         </p>
@@ -65,7 +65,7 @@ export default async function PaginaEvento({
 
       {evento.requiere_inscripcion && (
         <section className="space-y-4">
-          <h2 className="font-titulo text-xl text-tierra-700">Inscripcion</h2>
+          <h2 className="font-titulo text-xl text-primario-oscuro">Inscripción</h2>
           <Tarjeta className="space-y-4">
             <p className="text-texto-suave">
               {inscripciones.length}{' '}
@@ -78,7 +78,7 @@ export default async function PaginaEvento({
                 accion={alternarInscripcion.bind(null, ctx, evento.id)}
                 variante={miInscripcion ? 'suave' : 'primario'}
               >
-                {miInscripcion ? 'Anular mi inscripcion' : 'Me inscribo'}
+                {miInscripcion ? 'Anular mi inscripción' : 'Me inscribo'}
               </BotonAccion>
             ) : (
               <p className="text-atencion">Ya no quedan cupos.</p>
@@ -89,9 +89,9 @@ export default async function PaginaEvento({
 
       {esGestor && evento.requiere_inscripcion && inscripciones.length > 0 && (
         <section className="space-y-4">
-          <h2 className="font-titulo text-xl text-tierra-700">Asistencia</h2>
+          <h2 className="font-titulo text-xl text-primario-oscuro">Asistencia</h2>
           <p className="text-sm text-texto-suave">
-            Se registra para el acompanamiento, nunca como control.
+            Se registra para el acompañamiento, nunca como control.
           </p>
           <ul className="divide-y divide-borde">
             {inscripciones.map((inscripcion) => (
@@ -118,7 +118,7 @@ export default async function PaginaEvento({
       )}
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Para pegar en el grupo</h2>
+        <h2 className="font-titulo text-xl text-primario-oscuro">Para pegar en el grupo</h2>
         <CopiarParaWhatsapp texto={textoEvento(evento, escuela, URL_BASE)} />
       </section>
     </div>

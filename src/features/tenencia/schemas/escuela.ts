@@ -22,12 +22,12 @@ export const slugEscuela = z
   .max(48, 'El identificador no puede pasar de 48 caracteres')
   .regex(
     /^[a-z0-9]+(-[a-z0-9]+)*$/,
-    'Solo minusculas, numeros y guiones simples entre palabras',
+    'Solo minúsculas, números y guiones simples entre palabras',
   )
   // Una escuela llamada "login" quedaria tapada por la pagina de login.
   .refine(
     (slug) => !SLUGS_RESERVADOS.includes(slug),
-    'Ese identificador esta reservado. Elige otro.',
+    'Ese identificador está reservado. Elige otro.',
   )
 
 const zonaHoraria = z
@@ -56,16 +56,16 @@ export const crearEscuelaSchema = z.object({
     .string()
     .trim()
     .toUpperCase()
-    .length(2, 'Codigo de pais de dos letras, como CL o DE'),
+    .length(2, 'Código de país de dos letras, como CL o DE'),
   zonaHoraria,
   idioma: z.string().trim().toLowerCase().min(2).max(8),
   moneda: z
     .string()
     .trim()
     .toUpperCase()
-    .length(3, 'Codigo de moneda de tres letras, como CLP o EUR'),
+    .length(3, 'Código de moneda de tres letras, como CLP o EUR'),
   hemisferio: z.enum(['norte', 'sur'], {
-    error: 'Indica si la escuela esta en el hemisferio norte o sur',
+    error: 'Indica si la escuela está en el hemisferio norte o sur',
   }),
 })
 

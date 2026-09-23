@@ -28,18 +28,18 @@ test('alta de cuenta, alta de escuela y entrada a la escuela', async ({ page }) 
 
   await page.getByLabel('Nombre y apellido').fill('Maestra de Prueba')
   await page.getByLabel('Correo').fill(CORREO)
-  await page.getByLabel('Contrasena').fill(CLAVE)
+  await page.getByLabel('Contraseña').fill(CLAVE)
   await page.getByRole('button', { name: 'Crear cuenta' }).click()
 
   // Recien registrada y sin escuelas todavia.
   await expect(
-    page.getByRole('heading', { name: 'Todavia no tienes escuelas' }),
+    page.getByRole('heading', { name: 'Todavía no tienes escuelas' }),
   ).toBeVisible()
 
   await page.getByRole('link', { name: 'Crear una escuela' }).click()
 
   await page.getByLabel('Nombre de la escuela').fill('Escuela Waldorf Kimun')
-  await page.getByLabel('Identificador en la direccion').fill(SLUG)
+  await page.getByLabel('Identificador en la dirección').fill(SLUG)
   await page.getByRole('button', { name: 'Crear la escuela' }).click()
 
   // B1 + B2: quien crea la escuela queda como su administracion.
@@ -48,20 +48,26 @@ test('alta de cuenta, alta de escuela y entrada a la escuela', async ({ page }) 
     page.getByRole('heading', { name: 'Escuela Waldorf Kimun' }),
   ).toBeVisible()
 
-  // La escuela nace sin anio escolar: el calendario lo dice y ofrece crearlo.
-  // Ese boton solo se renderiza para gestores, asi que su presencia prueba el
-  // rol mejor que una etiqueta.
-  await expect(page.getByText('Todavia no hay un anio escolar activo')).toBeVisible()
+  // La escuela nace sin anio escolar. Quien no tiene hijos en la escuela ve el
+  // calendario como portada, y el calendario lo dice y ofrece crearlo. Ese
+  // boton solo se renderiza para gestores, asi que su presencia prueba el rol
+  // mejor que una etiqueta.
+  await expect(page.getByText('Todavía no hay un año escolar activo')).toBeVisible()
   await expect(
-    page.getByRole('link', { name: 'Crear el anio escolar' }),
+    page.getByRole('link', { name: 'Crear el año escolar' }),
   ).toBeVisible()
+
+  // Y el equipo tiene a mano su curso y el calendario completo.
+  const secciones = page.getByRole('navigation', { name: 'Secciones' })
+  await expect(secciones.getByRole('link', { name: 'Mi curso' })).toBeVisible()
+  await expect(secciones.getByRole('link', { name: 'Calendario' })).toBeVisible()
 })
 
 test('cerrar sesion y volver a entrar', async ({ page }) => {
   await page.goto('/login')
 
   await page.getByLabel('Correo').fill(CORREO)
-  await page.getByLabel('Contrasena').fill(CLAVE)
+  await page.getByLabel('Contraseña').fill(CLAVE)
   await page.getByRole('button', { name: 'Entrar' }).click()
 
   // Con una sola escuela se entra directo: es el caso mayoritario.
@@ -74,7 +80,7 @@ test('cerrar sesion y volver a entrar', async ({ page }) => {
 test('un slug de escuela ajena responde 404, no 403', async ({ page }) => {
   await page.goto('/login')
   await page.getByLabel('Correo').fill(CORREO)
-  await page.getByLabel('Contrasena').fill(CLAVE)
+  await page.getByLabel('Contraseña').fill(CLAVE)
   await page.getByRole('button', { name: 'Entrar' }).click()
   await expect(page).toHaveURL(`/${SLUG}`)
 
@@ -107,9 +113,9 @@ test('el alta clona la plantilla base', async () => {
 
   expect(error).toBeNull()
   expect(comisiones!.map((c) => c.nombre)).toEqual([
-    'Construccion',
+    'Construcción',
     'Cultura',
-    'Economia',
+    'Economía',
     'Festividades',
     'Huerto',
   ])

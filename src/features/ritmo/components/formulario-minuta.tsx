@@ -66,7 +66,7 @@ export function FormularioMinuta({
       </div>
 
       <p className="text-sm text-texto-suave">
-        Un dia en blanco se quita de la minuta.
+        Un día en blanco se quita de la minuta.
       </p>
 
       {estado.error && (

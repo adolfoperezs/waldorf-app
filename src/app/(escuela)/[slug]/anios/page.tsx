@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import {
   activarAnio,
@@ -11,6 +12,7 @@ import { formatearDia } from '@/features/ritmo/lib/fechas'
 import { aniosDeEscuela, epocasDeAnio } from '@/features/ritmo/queries/ritmo'
 import { cargarEscuela } from '@/features/tenencia/queries/contexto'
 import { BotonAccion } from '@/shared/ui/boton-accion'
+import { PanelLateral } from '@/shared/ui/panel-lateral'
 import { Tarjeta } from '@/shared/ui/tarjeta'
 
 export default async function PaginaAnios({
@@ -39,84 +41,82 @@ export default async function PaginaAnios({
 
   return (
     <div className="space-y-10">
-      <header className="space-y-1">
-        <h1 className="font-titulo text-3xl text-tierra-800">Anios escolares</h1>
-        <p className="text-texto-suave">
-          Solo uno activo a la vez. De el cuelgan las epocas, las festividades y
-          la minuta.
-        </p>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="font-titulo text-3xl">Años escolares</h1>
+          <p className="text-texto-suave">
+            Solo uno activo a la vez. De él cuelgan las épocas, las festividades y
+            la minuta.
+          </p>
+        </div>
+        <PanelLateral
+          titulo="Nuevo año escolar"
+          disparador={
+            <>
+              <Plus aria-hidden className="size-4" />
+              Nuevo año
+            </>
+          }
+        >
+          <FormularioAnio accion={crearAnio.bind(null, ctx)} />
+        </PanelLateral>
       </header>
 
-      <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Crear un anio</h2>
-        <Tarjeta>
-          <FormularioAnio accion={crearAnio.bind(null, ctx)} />
-        </Tarjeta>
-      </section>
+      {anios.length === 0 ? (
+        <p className="text-texto-suave">Todavía no hay ninguno.</p>
+      ) : (
+        <ul className="space-y-4">
+          {anios.map((anio) => {
+            const epocas = cuentaEpocas.get(anio.id) ?? 0
+            return (
+              <li key={anio.id}>
+                <Tarjeta className="space-y-4">
+                  <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                    <h2 className="font-titulo text-lg">{anio.nombre}</h2>
+                    {anio.activo && (
+                      <span className="rounded-full bg-salvia-100 px-2.5 py-0.5 text-xs font-medium text-salvia-700">
+                        Activo
+                      </span>
+                    )}
+                  </div>
 
-      <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Los anios</h2>
+                  <p className="text-sm text-texto-suave">
+                    {formatearDia(anio.inicio, escuela.idioma)} a{' '}
+                    {formatearDia(anio.fin, escuela.idioma)} · {epocas}{' '}
+                    {epocas === 1 ? 'época' : 'épocas'}
+                  </p>
 
-        {anios.length === 0 ? (
-          <p className="text-texto-suave">Todavia no hay ninguno.</p>
-        ) : (
-          <ul className="space-y-4">
-            {anios.map((anio) => {
-              const epocas = cuentaEpocas.get(anio.id) ?? 0
-              return (
-                <li key={anio.id}>
-                  <Tarjeta className="space-y-4">
-                    <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                      <h3 className="font-titulo text-lg text-tierra-800">
-                        {anio.nombre}
-                      </h3>
-                      {anio.activo && (
-                        <span className="rounded-suave bg-tierra-500 px-2 py-0.5 text-xs text-crema-50">
-                          Activo
-                        </span>
-                      )}
-                    </div>
-
-                    <p className="text-sm text-texto-suave">
-                      {formatearDia(anio.inicio, escuela.idioma)} a{' '}
-                      {formatearDia(anio.fin, escuela.idioma)} · {epocas}{' '}
-                      {epocas === 1 ? 'epoca' : 'epocas'}
-                    </p>
-
-                    <div className="flex flex-wrap gap-3">
-                      {anio.activo ? (
-                        <BotonAccion accion={cerrarAnio.bind(null, ctx, anio.id)}>
-                          Cerrar
-                        </BotonAccion>
-                      ) : (
-                        <BotonAccion accion={activarAnio.bind(null, ctx, anio.id)}>
-                          Activar
-                        </BotonAccion>
-                      )}
-
-                      {epocas === 0 && (
-                        <BotonAccion
-                          accion={materializarPlantilla.bind(null, ctx, anio.id)}
-                        >
-                          Cargar la plantilla
-                        </BotonAccion>
-                      )}
-                    </div>
+                  <div className="flex flex-wrap gap-3">
+                    {anio.activo ? (
+                      <BotonAccion accion={cerrarAnio.bind(null, ctx, anio.id)}>
+                        Cerrar
+                      </BotonAccion>
+                    ) : (
+                      <BotonAccion accion={activarAnio.bind(null, ctx, anio.id)}>
+                        Activar
+                      </BotonAccion>
+                    )}
 
                     {epocas === 0 && (
-                      <p className="text-sm text-texto-suave">
-                        Cargar la plantilla crea las epocas repartidas por el
-                        anio, las festividades que caen dentro y la minuta
-                        semanal. Es un punto de partida: despues se ajusta todo.
-                      </p>
+                      <BotonAccion accion={materializarPlantilla.bind(null, ctx, anio.id)}>
+                        Cargar la plantilla
+                      </BotonAccion>
                     )}
-                  </Tarjeta>
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </section>
+                  </div>
+
+                  {epocas === 0 && (
+                    <p className="text-sm text-texto-suave">
+                      Cargar la plantilla crea las épocas repartidas por el año, las
+                      festividades que caen dentro y la minuta semanal. Es un punto
+                      de partida: después se ajusta todo.
+                    </p>
+                  )}
+                </Tarjeta>
+              </li>
+            )
+          })}
+        </ul>
+      )}
     </div>
   )
 }

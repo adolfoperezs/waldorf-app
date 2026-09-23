@@ -34,7 +34,7 @@ export function FormularioLogin({ volver }: { volver?: string }) {
 
       <Campo
         id="password"
-        etiqueta="Contrasena"
+        etiqueta="Contraseña"
         type="password"
         autoComplete="current-password"
         required

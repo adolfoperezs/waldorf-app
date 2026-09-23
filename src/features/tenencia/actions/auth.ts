@@ -38,7 +38,7 @@ export async function iniciarSesion(
   const { error } = await supabase.auth.signInWithPassword(analisis.data)
 
   if (error) {
-    return { ...estadoInicial, error: 'El correo o la contrasena no coinciden' }
+    return { ...estadoInicial, error: 'El correo o la contraseña no coinciden' }
   }
 
   revalidatePath('/', 'layout')
@@ -75,7 +75,7 @@ export async function registrarse(
   if (error) {
     return {
       ...estadoInicial,
-      error: 'No pudimos crear la cuenta. Revisa los datos e intentalo de nuevo.',
+      error: 'No pudimos crear la cuenta. Revisa los datos e inténtalo de nuevo.',
     }
   }
 

@@ -9,8 +9,8 @@ export default function LayoutPublico({
   return (
     <div className="flex min-h-screen flex-col">
       <header className="px-6 py-6">
-        <Link href="/" className="font-titulo text-xl text-tierra-700">
-          Gestion Waldorf
+        <Link href="/" className="font-titulo text-xl text-primario-oscuro">
+          Gestión Waldorf
         </Link>
       </header>
 

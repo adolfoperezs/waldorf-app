@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 import { BotonEnvio } from '@/shared/ui/boton-envio'
 import { Campo } from '@/shared/ui/campo'
+import { useCerrarAlCompletar } from '@/shared/ui/panel-lateral'
 import { Seleccion } from '@/shared/ui/seleccion'
 
 type Accion = (
@@ -25,6 +26,7 @@ export function FormularioEpoca({
   ordenSugerido: number
 }) {
   const [estado, enviar] = useActionState(accion, estadoInicial)
+  useCerrarAlCompletar(estado)
 
   return (
     <form action={enviar} className="space-y-5">
@@ -32,8 +34,8 @@ export function FormularioEpoca({
 
       <Campo
         id="nombre"
-        etiqueta="Nombre de la epoca"
-        placeholder="Numeros y ritmo"
+        etiqueta="Nombre de la época"
+        placeholder="Números y ritmo"
         required
         errores={estado.errores?.nombre}
       />
@@ -41,7 +43,7 @@ export function FormularioEpoca({
       <Campo
         id="tema"
         etiqueta="Tema"
-        ayuda="Opcional. Una linea sobre de que trata."
+        ayuda="Opcional. Una línea sobre de qué trata."
         errores={estado.errores?.tema}
       />
 
@@ -76,7 +78,7 @@ export function FormularioEpoca({
 
         <Seleccion
           id="grupoId"
-          etiqueta="Para quien"
+          etiqueta="Para quién"
           ayuda="Toda la escuela, o solo un grupo."
           errores={estado.errores?.grupoId}
         >
@@ -95,7 +97,7 @@ export function FormularioEpoca({
         </p>
       )}
 
-      <BotonEnvio esperando="Creando...">Crear epoca</BotonEnvio>
+      <BotonEnvio esperando="Creando...">Crear la época</BotonEnvio>
     </form>
   )
 }

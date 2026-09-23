@@ -1,3 +1,4 @@
+import { Plus } from 'lucide-react'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import type { ContextoEscuela } from '@/features/ritmo/actions/contexto'
@@ -8,6 +9,7 @@ import { gruposDeEscuela } from '@/features/ritmo/queries/grupos'
 import { anioActivo, epocasDeAnio } from '@/features/ritmo/queries/ritmo'
 import { cargarEscuela } from '@/features/tenencia/queries/contexto'
 import { BotonAccion } from '@/shared/ui/boton-accion'
+import { PanelLateral } from '@/shared/ui/panel-lateral'
 import { Tarjeta } from '@/shared/ui/tarjeta'
 
 export default async function PaginaEpocas({
@@ -24,9 +26,9 @@ export default async function PaginaEpocas({
   if (!anio) {
     return (
       <div className="space-y-4">
-        <h1 className="font-titulo text-3xl text-tierra-800">Epocas</h1>
+        <h1 className="font-titulo text-3xl">Épocas</h1>
         <p className="text-texto-suave">
-          Las epocas cuelgan de un anio escolar. Activa uno primero.
+          Las épocas cuelgan de un año escolar. Activa uno primero.
         </p>
       </div>
     )
@@ -47,37 +49,44 @@ export default async function PaginaEpocas({
   const conAnio = cruzaAnioCivil(anio.inicio, anio.fin)
   const siguienteOrden =
     epocas.reduce((mayor, epoca) => Math.max(mayor, epoca.orden), 0) + 1
+  const nombreGrupo = new Map(grupos.map((g) => [g.id, g.nombre]))
 
   return (
     <div className="space-y-10">
-      <header className="space-y-1">
-        <h1 className="font-titulo text-3xl text-tierra-800">Epocas</h1>
-        <p className="text-texto-suave">
-          Anio {anio.nombre}. Las de un mismo grupo no se pueden solapar, y la
-          base de datos lo impide.
-        </p>
-      </header>
-
-      <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Nueva epoca</h2>
-        <Tarjeta>
+      <header className="flex flex-wrap items-end justify-between gap-4">
+        <div className="space-y-1">
+          <h1 className="font-titulo text-3xl">Épocas</h1>
+          <p className="text-texto-suave">
+            Año {anio.nombre}. Las de un mismo grupo no se pueden solapar, y la
+            base de datos lo impide.
+          </p>
+        </div>
+        <PanelLateral
+          titulo="Nueva época"
+          disparador={
+            <>
+              <Plus aria-hidden className="size-4" />
+              Nueva época
+            </>
+          }
+        >
           <FormularioEpoca
             accion={crearEpoca.bind(null, ctx)}
             anioId={anio.id}
             grupos={grupos}
             ordenSugerido={siguienteOrden}
           />
-        </Tarjeta>
-      </section>
+        </PanelLateral>
+      </header>
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">
-          {epocas.length} {epocas.length === 1 ? 'epoca' : 'epocas'}
+        <h2 className="font-titulo text-xl">
+          {epocas.length} {epocas.length === 1 ? 'época' : 'épocas'}
         </h2>
 
         {epocas.length === 0 ? (
           <p className="text-texto-suave">
-            Ninguna todavia. Puedes cargar la plantilla desde la pagina de anios.
+            Ninguna todavía. Puedes cargar la plantilla desde la página de años.
           </p>
         ) : (
           <ul className="space-y-3">
@@ -87,13 +96,15 @@ export default async function PaginaEpocas({
                   <div>
                     <Link
                       href={`/${slug}/epocas/${epoca.id}`}
-                      className="font-titulo text-lg text-tierra-800 underline decoration-crema-300 underline-offset-4"
+                      className="font-titulo text-lg text-primario-oscuro underline decoration-crema-300 underline-offset-4"
                     >
                       {epoca.orden}. {epoca.nombre}
                     </Link>
                     <p className="text-sm text-texto-suave">
                       {formatearRango(epoca.inicio, epoca.fin, escuela.idioma, conAnio)}
-                      {epoca.grupo_id ? ' · solo un grupo' : ''}
+                      {epoca.grupo_id
+                        ? ` · ${nombreGrupo.get(epoca.grupo_id) ?? 'solo un grupo'}`
+                        : ''}
                       {epoca.inicio <= hoy && hoy <= epoca.fin ? ' · en curso' : ''}
                     </p>
                   </div>

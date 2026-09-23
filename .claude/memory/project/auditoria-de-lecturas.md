@@ -13,7 +13,14 @@ dato sensible en la bitacora multiplica la exposicion en vez de reducirla.
 **No** se expone por RPC: si lo fuera, cualquiera podria ensuciar la bitacora con
 lecturas que nunca ocurrieron.
 
-**Pendiente (Fase 2):** las lecturas de `ninos` pasan por funciones RPC de `public`
-que consultan y registran en el mismo paso, llamando a `app.registrar_lectura` por
-dentro. Se decidio en la Fase 0 para que la capa de datos naciera asi en vez de
-retrofitearla.
+**Implementado (0007, 2026-09-23):** `public.ninos_de_mi_familia(escuela)` y
+`public.ninos_de_escuela(escuela)`. Son SECURITY DEFINER (solo asi pueden llamar a
+`app.registrar_lectura`, que sigue revocada para `authenticated`), y por saltarse la
+RLS filtran EXPLICITAMENTE y mas estrecho que `ninos_select`: la primera solo los hijos
+de quien llama, la segunda solo para administracion. Devuelven lo minimo que usa cada
+pantalla. La app no lee `ninos` directo en ningun sitio.
+
+Queda un hueco conocido: la tabla sigue legible por la API con la politica
+`ninos_select` (incluye a colegio_maestros, discrepancia P1 de docs/MAPA.md), y esas
+lecturas directas no se auditan. Cerrarlo es revocar SELECT de la tabla y dejar solo
+las funciones; conviene hacerlo junto con P1.

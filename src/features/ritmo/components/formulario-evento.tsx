@@ -4,6 +4,7 @@ import { useActionState } from 'react'
 import { estadoInicial, type EstadoFormulario } from '@/shared/lib/formulario'
 import { BotonEnvio } from '@/shared/ui/boton-envio'
 import { Campo } from '@/shared/ui/campo'
+import { useCerrarAlCompletar } from '@/shared/ui/panel-lateral'
 import { Seleccion } from '@/shared/ui/seleccion'
 import { NOMBRE_TIPO_EVENTO, TIPOS_EVENTO } from '../schemas/ritmo'
 
@@ -20,12 +21,13 @@ export function FormularioEvento({
   zonaHoraria: string
 }) {
   const [estado, enviar] = useActionState(accion, estadoInicial)
+  useCerrarAlCompletar(estado)
 
   return (
     <form action={enviar} className="space-y-5">
       <Campo
         id="titulo"
-        etiqueta="Titulo"
+        etiqueta="Título"
         placeholder="Jornada de huerto"
         required
         errores={estado.errores?.titulo}
@@ -57,8 +59,8 @@ export function FormularioEvento({
         />
       </div>
 
-      <Campo id="lugar" etiqueta="Donde" errores={estado.errores?.lugar} />
-      <Campo id="descripcion" etiqueta="Descripcion" errores={estado.errores?.descripcion} />
+      <Campo id="lugar" etiqueta="Dónde" errores={estado.errores?.lugar} />
+      <Campo id="descripcion" etiqueta="Descripción" errores={estado.errores?.descripcion} />
 
       <div className="space-y-3">
         <label className="flex items-center gap-3 text-sm">
@@ -91,7 +93,7 @@ export function FormularioEvento({
         </p>
       )}
 
-      <BotonEnvio esperando="Creando...">Crear evento</BotonEnvio>
+      <BotonEnvio esperando="Creando...">Crear el encuentro</BotonEnvio>
     </form>
   )
 }

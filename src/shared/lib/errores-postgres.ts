@@ -13,7 +13,7 @@
 const MENSAJES: Record<string, string> = {
   // exclusion_violation: las dos exclusion constraints de epocas y la de
   // maestro-guia vigente.
-  '23P01': 'Esas fechas se cruzan con otro periodo ya existente. Revisa el rango.',
+  '23P01': 'Esas fechas se cruzan con otro período ya existente. Revisa el rango.',
   // unique_violation
   '23505': 'Ya existe un registro con esos datos.',
   // foreign_key_violation. Con las FK compuestas, casi siempre significa que
@@ -27,9 +27,11 @@ const MENSAJES: Record<string, string> = {
   '42501': 'No tienes permiso para hacer este cambio.',
   // no_data_found
   P0002: 'No encontramos ese registro.',
+  // invalid_parameter_value: sumar_familia sin ninos.
+  '22023': 'Faltan datos: suma al menos un niño o niña.',
 }
 
 export function mensajeDeError(codigo?: string | null): string {
   if (codigo && MENSAJES[codigo]) return MENSAJES[codigo]
-  return 'No pudimos guardar el cambio. Intentalo de nuevo.'
+  return 'No pudimos guardar el cambio. Inténtalo de nuevo.'
 }

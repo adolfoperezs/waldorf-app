@@ -19,7 +19,7 @@ export function FormularioInvitacion({ accion }: { accion: Accion }) {
       <form action={enviar} className="space-y-5">
         <Seleccion
           id="rol"
-          etiqueta="Como que entra"
+          etiqueta="Como qué entra"
           value={rol}
           onChange={(e) => setRol(e.target.value as typeof rol)}
           ayuda={DESCRIPCION_ROL[rol]}
@@ -37,7 +37,7 @@ export function FormularioInvitacion({ accion }: { accion: Accion }) {
           etiqueta="Correo (opcional)"
           type="email"
           autoComplete="off"
-          ayuda="Si lo pones, solo esa persona podra usar el enlace. Sin correo, lo usa quien lo tenga: no lo mandes a un grupo abierto."
+          ayuda="Si lo pones, solo esa persona podrá usar el enlace. Sin correo, lo usa quien lo tenga: no lo mandes a un grupo abierto."
           errores={estado.errores?.correo}
         />
 
@@ -47,7 +47,7 @@ export function FormularioInvitacion({ accion }: { accion: Accion }) {
           </p>
         )}
 
-        <BotonEnvio esperando="Creando...">Crear enlace de invitacion</BotonEnvio>
+        <BotonEnvio esperando="Creando...">Crear enlace de invitación</BotonEnvio>
       </form>
 
       {estado.ok && estado.texto && (
@@ -57,7 +57,7 @@ export function FormularioInvitacion({ accion }: { accion: Accion }) {
         >
           <p className="font-medium">Enlace listo.</p>
           <p className="text-sm text-texto-suave">
-            Copialo ahora: por seguridad no se vuelve a mostrar. Si se pierde, crea
+            Cópialo ahora: por seguridad no se vuelve a mostrar. Si se pierde, crea
             otro y revoca este.
           </p>
           <CopiarParaWhatsapp texto={estado.texto} />

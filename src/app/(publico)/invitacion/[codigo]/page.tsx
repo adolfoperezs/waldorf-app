@@ -30,12 +30,10 @@ export default async function PaginaInvitacion({
   if (!user) {
     return (
       <div className="space-y-6">
-        <h1 className="font-titulo text-2xl text-tierra-800">
-          Te invitaron a una escuela
-        </h1>
+        <h1 className="font-titulo text-2xl">Te invitaron a una escuela</h1>
         <p className="text-texto-suave">
-          Para aceptar, crea tu cuenta o entra con la que ya tienes. Despues
-          vuelves aqui solo.
+          Para aceptar, crea tu cuenta o entra con la que ya tienes. Después
+          vuelves aquí solo.
         </p>
         <div className="flex flex-wrap gap-3">
           <Link href={`/signup?volver=${volver}`}>
@@ -53,7 +51,7 @@ export default async function PaginaInvitacion({
 
   if (!invitacion) {
     return (
-      <Aviso titulo="Este enlace no es valido">
+      <Aviso titulo="Este enlace no es válido">
         Revisa que lo hayas copiado completo, o pide a la escuela uno nuevo.
       </Aviso>
     )
@@ -61,8 +59,8 @@ export default async function PaginaInvitacion({
 
   if (invitacion.estado === 'usada') {
     return (
-      <Aviso titulo="Esta invitacion ya se uso">
-        Si fuiste tu,{' '}
+      <Aviso titulo="Esta invitación ya se usó">
+        Si fuiste tú,{' '}
         <Link href={`/${invitacion.escuela_slug}`} className="text-acento underline">
           entra a {invitacion.escuela_nombre}
         </Link>
@@ -73,7 +71,13 @@ export default async function PaginaInvitacion({
 
   if (invitacion.estado !== 'vigente') {
     return (
-      <Aviso titulo={invitacion.estado === 'expirada' ? 'Esta invitacion caduco' : 'Esta invitacion fue revocada'}>
+      <Aviso
+        titulo={
+          invitacion.estado === 'expirada'
+            ? 'Esta invitación caducó'
+            : 'Esta invitación fue revocada'
+        }
+      >
         Pide a {invitacion.escuela_nombre} un enlace nuevo.
       </Aviso>
     )
@@ -82,9 +86,7 @@ export default async function PaginaInvitacion({
   if (!invitacion.correo_coincide) {
     return (
       <div className="space-y-6">
-        <h1 className="font-titulo text-2xl text-tierra-800">
-          Esta invitacion es para otro correo
-        </h1>
+        <h1 className="font-titulo text-2xl">Esta invitación es para otro correo</h1>
         <p className="text-texto-suave">
           Entraste como {user.email}. Sal y entra con el correo al que te
           invitaron.
@@ -100,13 +102,26 @@ export default async function PaginaInvitacion({
 
   return (
     <div className="space-y-6">
-      <h1 className="font-titulo text-2xl text-tierra-800">
-        {invitacion.escuela_nombre}
-      </h1>
-      <p>
-        Te invita a unirte como <strong>{NOMBRE_ROL[invitacion.rol]}</strong>.
-      </p>
-      <p className="text-sm text-texto-suave">{DESCRIPCION_ROL[invitacion.rol]}</p>
+      <h1 className="font-titulo text-2xl">{invitacion.escuela_nombre}</h1>
+      {invitacion.familia_nombre ? (
+        <>
+          <p>
+            Les da la bienvenida como parte de la familia{' '}
+            <strong>{invitacion.familia_nombre}</strong>.
+          </p>
+          <p className="text-sm text-texto-suave">
+            Al aceptar vas a ver el ritmo de cada semana de tus hijos: el cuento o
+            la época, el cereal del día y lo que hay que llevar.
+          </p>
+        </>
+      ) : (
+        <>
+          <p>
+            Te invita a unirte como <strong>{NOMBRE_ROL[invitacion.rol]}</strong>.
+          </p>
+          <p className="text-sm text-texto-suave">{DESCRIPCION_ROL[invitacion.rol]}</p>
+        </>
+      )}
       <BotonAccion accion={aceptarInvitacion.bind(null, codigo)} variante="primario">
         Aceptar y entrar
       </BotonAccion>
@@ -117,7 +132,7 @@ export default async function PaginaInvitacion({
 function Aviso({ titulo, children }: { titulo: string; children: React.ReactNode }) {
   return (
     <div className="space-y-4">
-      <h1 className="font-titulo text-2xl text-tierra-800">{titulo}</h1>
+      <h1 className="font-titulo text-2xl">{titulo}</h1>
       <p className="text-texto-suave">{children}</p>
     </div>
   )

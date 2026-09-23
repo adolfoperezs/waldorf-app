@@ -22,11 +22,17 @@
   Si sientes ganas de escribir un enum con vocabulario pedagogico, es una tabla.
 - [invitaciones-por-enlace](project/invitaciones-por-enlace.md) - Enlace por WhatsApp,
   huella SHA-256, un solo uso. El correo solo protege si "Confirm email" esta activo.
-- [stack-y-diseno](project/stack-y-diseno.md) - Tailwind v4 (la plantilla venia rota),
-  estetica Waldorf, proxy.ts, movil primero.
+- [stack-y-diseno](project/stack-y-diseno.md) - Tailwind v4, tokens del lineamiento de
+  Kimun, panel lateral, React 19 vacia formularios, movil primero.
+- [ritmo-por-nino](project/ritmo-por-nino.md) - Ciclos jardin/escolar, ritmo semanal por
+  grupo, y como se reconcilia un lineamiento de UI con el dominio.
 
 ## feedback/ - Correcciones y preferencias
-(vacio)
+
+- [probar-en-el-sitio](feedback/probar-en-el-sitio.md) - Sin pruebas locales: build limpio,
+  push, y el usuario prueba en Vercel. Las tareas operativas las hago yo.
+- [token-supabase](feedback/token-supabase.md) - El usuario decidio no rotar el token.
+  No insistir. Pero nunca escribirlo en archivos del repositorio.
 
 ## reference/ - Donde encontrar cosas
 

@@ -59,12 +59,12 @@ export async function crearEscuela(
     if (error.code === '23505') {
       return {
         ...estadoInicial,
-        errores: { slug: ['Ese identificador ya esta tomado'] },
+        errores: { slug: ['Ese identificador ya está tomado'] },
       }
     }
     return {
       ...estadoInicial,
-      error: 'No pudimos crear la escuela. Intentalo de nuevo.',
+      error: 'No pudimos crear la escuela. Inténtalo de nuevo.',
     }
   }
 
@@ -76,9 +76,9 @@ export async function crearEscuela(
 /**
  * Clona la plantilla base en la escuela recien creada.
  *
- * Ahora mismo solo las comisiones: epocas, festividades, tramos de aporte y
- * minuta cuelgan de un ano escolar, y el ano se crea en la Fase 1. La
- * plantilla ya los trae y esa fase los materializa.
+ * Las comisiones y los ciclos (0007). Epocas, festividades, tramos de aporte
+ * y minuta cuelgan de un ano escolar y se materializan al crearlo; los grupos
+ * los carga cada escuela desde Grupos, porque sus nombres y cohortes son suyos.
  *
  * Es el mejor esfuerzo, no un paso critico. Si falla, la escuela ya existe y
  * su administracion puede crear las comisiones a mano; abortar aqui dejaria a
@@ -91,15 +91,21 @@ async function clonarPlantilla(
   try {
     const plantilla = await leerPlantilla(PLANTILLA_POR_DEFECTO)
 
-    if (plantilla.comisiones.length === 0) return
+    if (plantilla.comisiones.length > 0) {
+      await supabase.from('comisiones').insert(
+        plantilla.comisiones.map((comision) => ({
+          escuela_id: escuelaId,
+          nombre: comision.nombre,
+          descripcion: comision.descripcion ?? null,
+        })),
+      )
+    }
 
-    await supabase.from('comisiones').insert(
-      plantilla.comisiones.map((comision) => ({
-        escuela_id: escuelaId,
-        nombre: comision.nombre,
-        descripcion: comision.descripcion ?? null,
-      })),
-    )
+    if (plantilla.ciclos.length > 0) {
+      await supabase
+        .from('ciclos')
+        .insert(plantilla.ciclos.map((ciclo) => ({ escuela_id: escuelaId, ...ciclo })))
+    }
   } catch {
     // Sin datos de la escuela en el log (docs/PRIVACY.md).
     console.warn('No se pudo clonar la plantilla base en el alta de escuela')

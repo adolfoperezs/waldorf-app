@@ -19,9 +19,25 @@ duplica los valores hex. Dos fuentes de verdad se desincronizan a la primera.
 
 Ninguno de los cinco design systems del SaaS Factory sirve: neobrutalism, neumorphism
 y liquid glass son lenguaje visual de startup y la comunidad Waldorf los lee como
-ajenos. Base: paleta del Welcome Kit de Kimun. Cremas, marrones calidos, tierras.
-Serif (Lora) solo para titulos; el cuerpo va en fuentes del sistema para no descargar
-una segunda webfont.
+ajenos.
+
+**Desde 2026-09-23 los valores son los del lineamiento de Kimun** ("Digital Organico",
+`docs/lineamientos/`): lienzo #FAF7F2, primario #8C5A3C, titulos #6B4C35, acentos de
+ciclo salvia #5E7A5E / ocre #D99B43 / terracota #B85B43. Tipografia: Lora para titulos y
+**Plus Jakarta Sans** para la interfaz (antes era fuente del sistema; el lineamiento la
+pide y next/font la sirve del propio dominio con `swap`). Los acentos de ciclo tienen
+100/300/500/700: el 500 no da contraste de texto sobre claro, para texto va el 700.
+Las clases por acento estan escritas enteras en `src/shared/design/acentos.ts`:
+Tailwind no genera clases armadas con plantillas de texto.
+
+**Formularios en panel lateral** (`src/shared/ui/panel-lateral.tsx`, un `<dialog>`
+nativo), no fijos en la pagina. `useCerrarAlCompletar(estado)` lo cierra al guardar.
+Los que muestran un enlace de una sola vez (invitaciones) NO se cierran.
+
+**React 19 vacia los formularios** con `<form action>` al terminar la accion, aunque
+vuelva con errores. En formularios largos usar `useEnvioConservando`
+(`src/shared/ui/envio-conservando.ts`): `onSubmit` que despacha en una transicion y
+deja `action` para cuando no hay JavaScript.
 
 Movil primero y accesibilidad alta no son acabado: el usuario tipico es una maestra o
 un apoderado en un telefono de gama media con conexion irregular en la costa.

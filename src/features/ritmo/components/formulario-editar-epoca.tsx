@@ -35,7 +35,7 @@ export function FormularioEditarEpoca({
 
       <Campo
         id="nombre"
-        etiqueta="Nombre de la epoca"
+        etiqueta="Nombre de la época"
         defaultValue={epoca.nombre}
         required
         errores={estado.errores?.nombre}
@@ -81,7 +81,7 @@ export function FormularioEditarEpoca({
 
         <Seleccion
           id="grupoId"
-          etiqueta="Para quien"
+          etiqueta="Para quién"
           defaultValue={epoca.grupo_id ?? ''}
           errores={estado.errores?.grupoId}
         >
@@ -102,11 +102,11 @@ export function FormularioEditarEpoca({
 
       {estado.ok && (
         <p role="status" className="text-sm text-exito">
-          Epoca guardada.
+          Época guardada.
         </p>
       )}
 
-      <BotonEnvio esperando="Guardando...">Guardar la epoca</BotonEnvio>
+      <BotonEnvio esperando="Guardando...">Guardar la época</BotonEnvio>
     </form>
   )
 }

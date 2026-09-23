@@ -1,121 +1,127 @@
 import Link from 'next/link'
-import { LineaDeEpocas } from '@/features/ritmo/components/linea-de-epocas'
-import { MinutaSemanal } from '@/features/ritmo/components/minuta-semanal'
+import { gruposPorIds, ninosDeMiFamilia } from '@/features/comunidad/queries/comunidad'
+import { PanelNino } from '@/features/ritmo/components/panel-nino'
+import { SelectorDeHijos } from '@/features/ritmo/components/selector-de-hijos'
+import { VistaCalendario } from '@/features/ritmo/components/vista-calendario'
 import {
-  cruzaAnioCivil,
-  diaSemanaEnEscuela,
-  formatearDia,
   formatearInstante,
+  formatearSemana,
   hoyEnEscuela,
+  lunesDe,
+  semanaVisible,
 } from '@/features/ritmo/lib/fechas'
-import { calendario } from '@/features/ritmo/queries/ritmo'
+import { eventosProximos } from '@/features/ritmo/queries/ritmo'
+import {
+  contextoDeSemana,
+  diasDeLaSemana,
+  epocaDelDia,
+  eventosDeGrupos,
+  ritmosDeSemana,
+} from '@/features/ritmo/queries/ritmo-semanal'
 import { cargarEscuela } from '@/features/tenencia/queries/contexto'
-import { Boton } from '@/shared/ui/boton'
-import { Tarjeta } from '@/shared/ui/tarjeta'
 
 /**
- * El calendario de la escuela. Es la pantalla mas usada del sistema y su
- * lector tipico es un apoderado en un telefono de gama media con mala senal:
- * movil primero, una columna, sin adornos.
+ * La portada. Para una familia, el ritmo de cada hijo segun su ciclo, con el
+ * selector de hijos arriba (lineamiento, 3.1). Para el equipo, sin hijos en
+ * la escuela, el calendario.
+ *
+ * Es la pantalla mas usada del sistema y su lector tipico es un apoderado en
+ * un telefono de gama media con mala senal: todo en una pasada al servidor.
  */
-export default async function PaginaCalendario({
+export default async function PaginaInicio({
   params,
 }: {
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const { escuela, esGestor } = await cargarEscuela(slug)
-  const { anio, epocas, epocaEnCurso, festividades, eventos, minuta } =
-    await calendario(escuela)
+  const { escuela, roles, esGestor } = await cargarEscuela(slug)
+  const accesoMiCurso =
+    esGestor || roles.some((rol) => rol === 'maestro_guia' || rol === 'maestro_especialidad')
 
-  const hoy = hoyEnEscuela(escuela.zona_horaria)
-  const diaDeHoy = diaSemanaEnEscuela(escuela.zona_horaria)
+  // Lectura auditada: pasa por ninos_de_mi_familia (docs/PRIVACY.md, nivel Menor).
+  const hijos = await ninosDeMiFamilia(escuela.id)
 
-  if (!anio) {
+  if (hijos.length === 0) {
     return (
-      <div className="space-y-6">
-        <h1 className="font-titulo text-3xl text-tierra-800">{escuela.nombre}</h1>
-        <Tarjeta className="space-y-4">
-          <p className="text-texto-suave">
-            Todavia no hay un anio escolar activo. El calendario, las epocas y
-            las festividades cuelgan de el.
-          </p>
-          {esGestor && (
-            <Link href={`/${slug}/anios`}>
-              <Boton>Crear el anio escolar</Boton>
-            </Link>
-          )}
-        </Tarjeta>
-      </div>
+      <VistaCalendario escuela={escuela} esGestor={esGestor} accesoMiCurso={accesoMiCurso} />
     )
   }
 
-  // Un anio lectivo del hemisferio norte va de septiembre a junio: sin el anio
-  // civil, "5 de abril" despues de "1 de diciembre" parece un error de orden.
-  const conAnio = cruzaAnioCivil(anio.inicio, anio.fin)
+  const hoy = hoyEnEscuela(escuela.zona_horaria)
+  const semana = semanaVisible(hoy)
+  const esProximaSemana = semana > lunesDe(hoy)
+  // Para la epoca vigente: hoy, o el lunes si ya se muestra la semana que viene.
+  const diaDeReferencia = esProximaSemana ? semana : hoy
 
-  const proximasFestividades = festividades.filter((f) => f.fecha >= hoy).slice(0, 5)
+  const grupoIds = [
+    ...new Set(hijos.map((h) => h.grupo_id).filter((id): id is string => Boolean(id))),
+  ]
+
+  const [grupos, ritmos, contexto, eventos, proximos] = await Promise.all([
+    gruposPorIds(grupoIds),
+    ritmosDeSemana(grupoIds, semana, { soloPublicado: true }),
+    contextoDeSemana(escuela.id, grupoIds, semana),
+    eventosDeGrupos(escuela.id, grupoIds),
+    eventosProximos(escuela.id, 3),
+  ])
+
+  const grupoPorId = new Map(grupos.map((g) => [g.id, g]))
+  const rangoSemana = formatearSemana(semana, escuela.idioma)
+
+  const enSelector = hijos.map((hijo) => {
+    const grupo = hijo.grupo_id ? (grupoPorId.get(hijo.grupo_id) ?? null) : null
+    return {
+      id: hijo.id,
+      nombre: hijo.nombre,
+      grupo: grupo?.nombre ?? null,
+      modalidad: grupo?.ciclo?.modalidad ?? null,
+      acento: grupo?.ciclo?.acento ?? null,
+      panel: (
+        <PanelNino
+          nombre={hijo.nombre}
+          grupo={grupo}
+          ritmo={grupo ? ritmos.get(grupo.id) : undefined}
+          dias={grupo ? diasDeLaSemana(grupo.id, semana, ritmos.get(grupo.id), contexto) : []}
+          epoca={grupo ? epocaDelDia(contexto.epocas, grupo.id, diaDeReferencia) : null}
+          eventos={eventos.filter((e) => e.grupo_id === grupo?.id)}
+          hoy={hoy}
+          esProximaSemana={esProximaSemana}
+          rangoSemana={rangoSemana}
+          escuela={escuela}
+        />
+      ),
+    }
+  })
 
   return (
     <div className="space-y-10">
-      <header className="space-y-1">
-        <h1 className="font-titulo text-3xl text-tierra-800">{escuela.nombre}</h1>
-        <p className="text-texto-suave">Anio {anio.nombre}</p>
-      </header>
+      <h1 className="font-titulo text-3xl">
+        {hijos.length === 1 ? `El ritmo de ${hijos[0].nombre}` : 'El ritmo de tus hijos'}
+      </h1>
 
-      {epocaEnCurso && (
-        <section className="space-y-4">
-          <h2 className="font-titulo text-xl text-tierra-700">Ahora</h2>
-          <Tarjeta className="space-y-4">
-            <div>
-              <p className="font-titulo text-2xl text-tierra-800">
-                {epocaEnCurso.nombre}
-              </p>
-              <p className="text-sm text-texto-suave">
-                Hasta el{' '}
-                {formatearDia(
-                  epocaEnCurso.fin,
-                  escuela.idioma,
-                  { day: 'numeric', month: 'long' },
-                  conAnio,
-                )}
-              </p>
-              {epocaEnCurso.tema && <p className="mt-2">{epocaEnCurso.tema}</p>}
-            </div>
+      <SelectorDeHijos hijos={enSelector} clave={escuela.id} />
 
-            <div className="border-t border-borde pt-4">
-              <h3 className="mb-2 text-sm text-texto-suave">Minuta de la epoca</h3>
-              <MinutaSemanal minuta={minuta} diaDeHoy={diaDeHoy} />
-            </div>
-          </Tarjeta>
-        </section>
-      )}
-
-      <section className="space-y-4">
+      <section className="space-y-4 border-t border-borde pt-8">
         <div className="flex items-baseline justify-between gap-4">
-          <h2 className="font-titulo text-xl text-tierra-700">Proximos encuentros</h2>
-          <Link href={`/${slug}/eventos`} className="text-sm text-acento underline">
-            Ver todos
+          <h2 className="font-titulo text-xl">En la escuela</h2>
+          <Link href={`/${slug}/calendario`} className="text-sm text-acento underline">
+            Ver el calendario
           </Link>
         </div>
 
-        {eventos.length === 0 ? (
+        {proximos.length === 0 ? (
           <p className="text-texto-suave">No hay encuentros agendados.</p>
         ) : (
           <ul className="space-y-3">
-            {eventos.map((evento) => (
+            {proximos.map((evento) => (
               <li key={evento.id}>
                 <Link
                   href={`/${slug}/eventos/${evento.id}`}
-                  className="block rounded-organico border border-borde bg-superficie p-4 hover:bg-crema-100"
+                  className="block rounded-organico border border-borde bg-superficie p-4 transition duration-200 hover:-translate-y-0.5 hover:shadow-elevado"
                 >
                   <p className="font-medium">{evento.titulo}</p>
                   <p className="text-sm text-texto-suave">
-                    {formatearInstante(
-                      evento.inicio,
-                      escuela.zona_horaria,
-                      escuela.idioma,
-                    )}
+                    {formatearInstante(evento.inicio, escuela.zona_horaria, escuela.idioma)}
                     {evento.lugar ? ` · ${evento.lugar}` : ''}
                   </p>
                 </Link>
@@ -123,40 +129,6 @@ export default async function PaginaCalendario({
             ))}
           </ul>
         )}
-      </section>
-
-      {proximasFestividades.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="font-titulo text-xl text-tierra-700">Festividades</h2>
-          <ul className="divide-y divide-borde">
-            {proximasFestividades.map((festividad) => (
-              <li
-                key={festividad.id}
-                className="flex flex-wrap items-baseline justify-between gap-2 py-3"
-              >
-                <span>{festividad.nombre}</span>
-                <span className="text-sm text-texto-suave">
-                  {formatearDia(
-                    festividad.fecha,
-                    escuela.idioma,
-                    { day: 'numeric', month: 'long' },
-                    conAnio,
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">El anio</h2>
-        <LineaDeEpocas
-          epocas={epocas}
-          hoy={hoy}
-          idioma={escuela.idioma}
-          conAnio={conAnio}
-        />
       </section>
     </div>
   )

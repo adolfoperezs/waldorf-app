@@ -24,8 +24,12 @@ export const colores = {
   texto: v('texto'),
   textoSuave: v('texto-suave'),
 
-  // Acento principal
+  // Identidad: madera y tierra
+  primario: v('primario'),
+  primarioOscuro: v('primario-oscuro'),
+  primarioHover: v('primario-hover'),
   acento: v('acento'),
+  diaActivo: v('dia-activo'),
 
   /**
    * Semanticos. En economia el tono importa: `atencion` es ocre, no rojo.
@@ -40,9 +44,9 @@ export const colores = {
 export const escalas = {
   crema: [50, 100, 200, 300].map((p) => v(`crema-${p}`)),
   tierra: [200, 300, 400, 500, 600, 700, 800, 900].map((p) => v(`tierra-${p}`)),
-  salvia: [300, 500, 700].map((p) => v(`salvia-${p}`)),
-  arcilla: [300, 500, 700].map((p) => v(`arcilla-${p}`)),
-  ocre: [300, 500, 700].map((p) => v(`ocre-${p}`)),
+  salvia: [100, 300, 500, 700].map((p) => v(`salvia-${p}`)),
+  arcilla: [100, 300, 500, 700].map((p) => v(`arcilla-${p}`)),
+  ocre: [100, 300, 500, 700].map((p) => v(`ocre-${p}`)),
 } as const
 
 /**
@@ -60,6 +64,6 @@ export const paletaGraficos = [
 ] as const
 
 /** Color de la barra del navegador en movil. */
-export const colorTema = '#fbf7f0'
+export const colorTema = '#faf7f2'
 
 export type Colores = typeof colores

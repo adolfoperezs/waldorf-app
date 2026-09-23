@@ -6,7 +6,7 @@ import { z } from 'zod'
 
 export const credencialesSchema = z.object({
   email: z.email('Revisa el correo'),
-  password: z.string().min(1, 'Escribe tu contrasena'),
+  password: z.string().min(1, 'Escribe tu contraseña'),
 })
 
 export const registroSchema = z.object({
@@ -24,7 +24,7 @@ export const registroSchema = z.object({
   password: z
     .string()
     .min(10, 'Usa al menos 10 caracteres')
-    .max(72, 'Maximo 72 caracteres'),
+    .max(72, 'Máximo 72 caracteres'),
 })
 
 export type Credenciales = z.infer<typeof credencialesSchema>

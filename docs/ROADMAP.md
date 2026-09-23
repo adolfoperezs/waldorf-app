@@ -54,9 +54,12 @@ festividades y eventos hay alta y baja, no edición.
 
 ## Fase 2 — Comunidad y economía
 
-- [ ] Migración `0003_comunidad_economia`
-- [ ] Familias, miembros y niños
-- [ ] Grupos y relación plurianual con maestros
+- [x] Migración `0003_comunidad_economia`
+- [x] Familias, miembros y niños — "Sumar familia" con invitación atada a la familia (0007)
+- [x] Grupos y relación plurianual con maestros — ciclos, grupos y maestra guía (0007)
+- [x] Ritmo por niño: selector de hijos, vista según ciclo y "Mi curso" para la maestra.
+      No estaba en el plan original: lo pidió la escuela en
+      `docs/lineamientos/2026-09-especificacion-ux-kimun.md` (PRP-002)
 - [ ] Comisiones y sus integrantes
 - [ ] Tramos y acuerdos de aporte
 - [ ] Registro de aportes en dinero y en horas

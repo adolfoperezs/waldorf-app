@@ -15,7 +15,7 @@ export function MinutaSemanal({
   diaDeHoy: number
 }) {
   if (minuta.length === 0) {
-    return <p className="text-texto-suave">Esta epoca no tiene minuta cargada.</p>
+    return <p className="text-texto-suave">Esta época no tiene minuta cargada.</p>
   }
 
   return (

@@ -22,5 +22,15 @@ Seguridad, y por que no se puede aflojar:
 El rol NO da acceso a ninos: lo dan `grupo_maestros` y `familia_miembros`. Invitar a una
 familia le abre el calendario, no a sus hijos. Ver `docs/MAPA.md`, seccion 2.
 
+**Desde 0007:** `invitaciones.familia_id` (solo con rol familia, CHECK). "Sumar familia"
+llama a `sumar_familia` (INVOKER, una transaccion: familia + ninos + invitacion) y
+`aceptar_invitacion` agrega a quien acepta a `familia_miembros` (el primero queda como
+principal). Un enlace = una persona: el segundo apoderado pide otro desde la tarjeta de
+la familia.
+
+El boton "Enviar por WhatsApp" usa `whatsapp://send?text=`, NO `https://wa.me/?text=`:
+el esquema lo abre la app del telefono sin pasar por un servidor web, y el texto lleva
+el enlace de invitacion y nombres de ninos (docs/PRIVACY.md: nada personal en URLs).
+
 Se implemento sin PRP ni pruebas locales, por decision explicita del usuario (probar
 directo en produccion). No hay test automatizado de este flujo todavia.

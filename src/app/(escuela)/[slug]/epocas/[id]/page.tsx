@@ -41,13 +41,13 @@ export default async function PaginaEpoca({
     <div className="space-y-10">
       <header className="space-y-2">
         <Link href={`/${slug}/epocas`} className="text-sm text-acento underline">
-          Volver a las epocas
+          Volver a las épocas
         </Link>
-        <h1 className="font-titulo text-3xl text-tierra-800">{epoca.nombre}</h1>
+        <h1 className="font-titulo text-3xl text-primario-oscuro">{epoca.nombre}</h1>
       </header>
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">La epoca</h2>
+        <h2 className="font-titulo text-xl text-primario-oscuro">La época</h2>
         <Tarjeta>
           <FormularioEditarEpoca
             accion={actualizarEpoca.bind(null, ctx, epoca.id)}
@@ -58,9 +58,9 @@ export default async function PaginaEpoca({
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Minuta</h2>
+        <h2 className="font-titulo text-xl text-primario-oscuro">Minuta</h2>
         <p className="text-texto-suave">
-          El ritmo semanal de esta epoca. Cambia con ella, no con el mes.
+          El ritmo semanal de esta época. Cambia con ella, no con el mes.
         </p>
         <Tarjeta>
           <FormularioMinuta
@@ -71,7 +71,7 @@ export default async function PaginaEpoca({
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-titulo text-xl text-tierra-700">Para pegar en el grupo</h2>
+        <h2 className="font-titulo text-xl text-primario-oscuro">Para pegar en el grupo</h2>
         <CopiarParaWhatsapp texto={textoEpoca(epoca, escuela, URL_BASE)} />
       </section>
     </div>
