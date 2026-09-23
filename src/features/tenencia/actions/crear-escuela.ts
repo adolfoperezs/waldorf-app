@@ -97,6 +97,7 @@ async function clonarPlantilla(
           escuela_id: escuelaId,
           nombre: comision.nombre,
           descripcion: comision.descripcion ?? null,
+          ve_economia: comision.ve_economia,
         })),
       )
     }

@@ -176,7 +176,9 @@ Leído de las políticas de seguridad aplicadas hoy en producción.
 | Familias | ✏️ | — | — | 🔸 |
 | Niños | ✏️ | — | 🔸 de su grupo ² | 🔸 sus hijos ³ |
 | Tramos de aporte | ✏️ | 👁️ | 👁️ | 👁️ |
-| Acuerdos y aportes | ✏️ | — | — | 🔸 |
+| Acuerdos y aportes | ✏️ | — | — | 🔸 ⁵ |
+| Panel económico (sumas, sin familias) | 👁️ | — ⁶ | — ⁶ | — ⁶ |
+| Avance de las campañas | 👁️ | 👁️ | 👁️ | 👁️ |
 | Auditoría | 👁️ | — | — | — |
 
 1. Quien integra una comisión puede además gestionar las campañas de **esa** comisión. Lo
@@ -190,6 +192,11 @@ Leído de las políticas de seguridad aplicadas hoy en producción.
    las columnas con datos del niño no son legibles por la API.
 4. Por `contactos_de_escuela`, que solo responde a administración. Las columnas `email`
    y `telefono` de `perfiles` no son legibles por la API, ni siquiera las propias.
+5. La familia además **registra sus propias horas**, siempre "por confirmar"; la
+   administración las confirma o las anula. El dinero lo registra solo la administración.
+6. Lo ven, además de la administración, los integrantes de la comisión marcada con
+   `ve_economia`, sea cual sea su rol: por `resumen_economico`, que devuelve sumas por mes
+   y nunca una familia.
 
 Además, **cualquier persona con cuenta puede crear una escuela nueva**, y queda como su
 administración. Es el único punto del sistema que se salta la RLS, a propósito.
@@ -357,6 +364,29 @@ del curso: no enviamos notificaciones, integramos con lo que la comunidad ya usa
 
 ---
 
+### La economía de la escuela
+
+Dos monedas, dinero y horas de trabajo comunitario, y un **acuerdo** por familia y año
+(nunca una deuda: lo que falta es "por completar").
+
+```mermaid
+flowchart LR
+    T["Tramos del año<br/>sugieren monto y horas"] --> A["Acuerdo de la familia<br/>monto y horas al mes, desde un mes"]
+    A --> M["Mes a mes<br/>comprometido vs aportado"]
+    D["Dinero<br/>lo registra administración"] --> M
+    H["Horas<br/>las registra la familia"] -->|"administración confirma"| M
+    D -.->|"con campaña"| C["Campaña<br/>meta y avance"]
+    H -.->|"con campaña: cuentan<br/>para las dos"| C
+    M --> F["Nuestro aporte<br/>la familia ve lo suyo"]
+    M --> P["Panel económico<br/>sumas por mes, sin familias"]
+```
+
+- El dinero dado a una campaña **no completa el acuerdo** mensual: se ve en la campaña.
+  Las horas sí cuentan, sean de una comisión o de una campaña.
+- Los meses del acuerdo van del mes de inicio al de fin del año escolar; una familia que
+  llega a mitad de año empieza a contar desde su mes.
+- Anular no borra: el registro económico se conserva y la auditoría guarda quién anuló.
+
 ## 7. Discrepancias detectadas al hacer este mapa
 
 Cosas que el sistema hacía y que no calzaban con `PRIVACY.md`. **Corregidas en
@@ -384,7 +414,7 @@ aunque siga en `familia_miembros`. Verificación: `supabase/verificacion/privaci
 | Ritmo: año, épocas, festividades, minuta, encuentros | ✅ | ✅ |
 | Ritmo semanal por grupo y vista por niño | ✅ | ✅ |
 | Comunidad: ciclos, grupos, familias, niños | ✅ | ✅ |
-| Comunidad: comisiones | ✅ | — |
-| Economía: acuerdos, aportes, campañas | ✅ | — |
+| Comunidad: comisiones | ✅ | ✅ |
+| Economía: tramos, acuerdos, aportes, paneles, campañas | ✅ | ✅ |
 | Desarrollo: observaciones, informes | — | — |
 | Privacidad: consentimientos, derechos del titular | auditoría de escrituras | — |

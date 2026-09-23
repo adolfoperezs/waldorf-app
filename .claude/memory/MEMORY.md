@@ -24,6 +24,8 @@
   huella SHA-256, un solo uso. El correo solo protege si "Confirm email" esta activo.
 - [stack-y-diseno](project/stack-y-diseno.md) - Tailwind v4, tokens del lineamiento de
   Kimun, panel lateral, React 19 vacia formularios, movil primero.
+- [economia](project/economia.md) - Dos monedas, acuerdo no deuda, reglas de calculo
+  duplicadas en TS y SQL que deben coincidir, comision ve solo sumas.
 - [ritmo-por-nino](project/ritmo-por-nino.md) - Ciclos jardin/escolar, ritmo semanal por
   grupo, y como se reconcilia un lineamiento de UI con el dominio.
 

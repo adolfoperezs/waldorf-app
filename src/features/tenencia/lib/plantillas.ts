@@ -24,7 +24,12 @@ export const plantillaSchema = z.object({
   moneda: z.string().length(3),
 
   comisiones: z.array(
-    z.object({ nombre: z.string(), descripcion: z.string().optional() }),
+    z.object({
+      nombre: z.string(),
+      descripcion: z.string().optional(),
+      /** Sus integrantes ven el panel economico (0009). */
+      ve_economia: z.boolean().default(false),
+    }),
   ),
 
   /**

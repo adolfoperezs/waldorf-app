@@ -1,5 +1,6 @@
 import { CircleUserRound, Sprout } from 'lucide-react'
 import Link from 'next/link'
+import { miFamilia, misComisiones } from '@/features/economia/queries/economia'
 import { cerrarSesion } from '@/features/tenencia/actions/auth'
 import { cargarEscuela } from '@/features/tenencia/queries/contexto'
 import { misEscuelas } from '@/features/tenencia/queries/escuela'
@@ -37,6 +38,12 @@ export default async function LayoutEscuela({
   const primerNombre =
     typeof nombreCompleto === 'string' ? nombreCompleto.trim().split(/\s+/)[0] : null
 
+  // Dos consultas livianas para saber que secciones de economia mostrar.
+  const [familia, comisiones] = user
+    ? await Promise.all([miFamilia(escuela.id, user.id), misComisiones(escuela.id, user.id)])
+    : [null, []]
+  const veEconomia = comisiones.some((c) => c.veEconomia)
+
   const tieneCurso =
     esGestor || roles.some((rol) => rol === 'maestro_guia' || rol === 'maestro_especialidad')
 
@@ -46,10 +53,22 @@ export default async function LayoutEscuela({
     ...(tieneCurso ? [{ href: `${base}/ritmo`, texto: 'Mi curso' }] : []),
     { href: `${base}/calendario`, texto: 'Calendario' },
     { href: `${base}/eventos`, texto: 'Encuentros' },
-    ...(esAdministracion ? [{ href: `${base}/familias`, texto: 'Familias' }] : []),
+    { href: `${base}/campanas`, texto: 'Campañas' },
+    ...(familia ? [{ href: `${base}/mi-aporte`, texto: 'Nuestro aporte' }] : []),
+    // La administracion llega al panel desde Economia.
+    ...(veEconomia && !esAdministracion
+      ? [{ href: `${base}/panel-economico`, texto: 'Panel económico' }]
+      : []),
+    ...(esAdministracion
+      ? [
+          { href: `${base}/economia`, texto: 'Economía' },
+          { href: `${base}/familias`, texto: 'Familias' },
+        ]
+      : []),
     ...(esGestor
       ? [
           { href: `${base}/grupos`, texto: 'Grupos' },
+          { href: `${base}/comisiones`, texto: 'Comisiones' },
           { href: `${base}/epocas`, texto: 'Épocas' },
           { href: `${base}/anios`, texto: 'Años' },
         ]

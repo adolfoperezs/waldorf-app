@@ -60,12 +60,15 @@ festividades y eventos hay alta y baja, no edición.
 - [x] Ritmo por niño: selector de hijos, vista según ciclo y "Mi curso" para la maestra.
       No estaba en el plan original: lo pidió la escuela en
       `docs/lineamientos/2026-09-especificacion-ux-kimun.md` (PRP-002)
-- [ ] Comisiones y sus integrantes
-- [ ] Tramos y acuerdos de aporte
-- [ ] Registro de aportes en dinero y en horas
-- [ ] Panel de la familia: su acuerdo, lo aportado, lo pendiente
-- [ ] Panel de la comisión de economía: agregados, brechas, proyección
-- [ ] Campañas ancladas a época o festividad
+- [x] Comisiones y sus integrantes
+- [x] Tramos y acuerdos de aporte (0009, PRP-004)
+- [x] Registro de aportes en dinero y en horas — la familia registra sus horas y la
+      administración las confirma
+- [x] Panel de la familia: su acuerdo, lo aportado, lo por completar ("Nuestro aporte")
+- [x] Panel de la comisión de economía: agregados, familias al día, proyección — sin el
+      detalle de ninguna familia
+- [x] Campañas ancladas a época o comisión, con meta y avance
+- [ ] Validar contra la planilla real de Kimün: un mes completo de aportes debe cuadrar
 
 Criterio de salida: la Comisión de Economía deja de usar planillas.
 

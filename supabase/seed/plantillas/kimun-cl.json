@@ -8,7 +8,7 @@
   "moneda": "CLP",
 
   "comisiones": [
-    { "nombre": "Economía", "descripcion": "Aportes, presupuesto y proyección." },
+    { "nombre": "Economía", "descripcion": "Aportes, presupuesto y proyección.", "ve_economia": true },
     { "nombre": "Huerto", "descripcion": "Huerta, compost y ciclo de la tierra." },
     { "nombre": "Construcción", "descripcion": "Mantención y obras de la escuela." },
     { "nombre": "Festividades", "descripcion": "Preparación de las fiestas del año." },

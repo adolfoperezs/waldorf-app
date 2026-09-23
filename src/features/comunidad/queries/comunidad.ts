@@ -170,3 +170,38 @@ export async function ninosDeMiFamilia(escuelaId: string) {
   const { data } = await supabase.rpc('ninos_de_mi_familia', { p_escuela: escuelaId })
   return data ?? []
 }
+
+// ---------------------------------------------------------------------
+// Comisiones
+// ---------------------------------------------------------------------
+
+export async function comisionesConIntegrantes(escuelaId: string) {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase
+    .from('comisiones')
+    .select(
+      'id, nombre, descripcion, ve_economia, comision_miembros(id, perfil_id, coordina, perfiles(nombre_completo))',
+    )
+    .eq('escuela_id', escuelaId)
+    .eq('activa', true)
+    .order('nombre')
+  return data ?? []
+}
+
+/** Las personas con membresia vigente, una vez cada una, por nombre. */
+export async function personasDeEscuela(escuelaId: string) {
+  const supabase = await crearClienteServidor()
+  const { data } = await supabase
+    .from('membresias')
+    .select('perfil_id, perfiles(nombre_completo)')
+    .eq('escuela_id', escuelaId)
+    .eq('activa', true)
+
+  const porPersona = new Map<string, string>()
+  for (const fila of data ?? []) {
+    porPersona.set(fila.perfil_id, fila.perfiles?.nombre_completo ?? 'Sin nombre')
+  }
+  return [...porPersona.entries()]
+    .map(([id, nombre]) => ({ id, nombre }))
+    .sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'))
+}

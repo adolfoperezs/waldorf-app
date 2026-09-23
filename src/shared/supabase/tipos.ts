@@ -466,6 +466,7 @@ export type Database = {
           id: string
           nombre: string
           updated_at: string
+          ve_economia: boolean
         }
         Insert: {
           activa?: boolean
@@ -475,6 +476,7 @@ export type Database = {
           id?: string
           nombre: string
           updated_at?: string
+          ve_economia?: boolean
         }
         Update: {
           activa?: boolean
@@ -484,6 +486,7 @@ export type Database = {
           id?: string
           nombre?: string
           updated_at?: string
+          ve_economia?: boolean
         }
         Relationships: [
           {
@@ -1433,6 +1436,15 @@ export type Database = {
     Functions: {
       aceptar_invitacion: { Args: { p_token: string }; Returns: string }
       activar_anio: { Args: { p_anio: string }; Returns: undefined }
+      avance_de_campanas: {
+        Args: { p_escuela: string }
+        Returns: {
+          aportes: number
+          campana_id: string
+          dinero: number
+          horas: number
+        }[]
+      }
       contactos_de_escuela: {
         Args: { p_escuela: string }
         Returns: {
@@ -1475,6 +1487,19 @@ export type Database = {
           grupo_id: string
           id: string
           nombre: string
+        }[]
+      }
+      resumen_economico: {
+        Args: { p_anio: string }
+        Returns: {
+          aportado_dinero: number
+          aportado_horas: number
+          comprometido_dinero: number
+          comprometido_horas: number
+          familias_al_dia: number
+          familias_con_acuerdo: number
+          horas_por_confirmar: number
+          periodo: string
         }[]
       }
       sumar_familia: {
