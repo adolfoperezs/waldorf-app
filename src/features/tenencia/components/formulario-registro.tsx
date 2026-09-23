@@ -16,11 +16,13 @@ function BotonEnviar() {
   )
 }
 
-export function FormularioRegistro() {
+export function FormularioRegistro({ volver }: { volver?: string }) {
   const [estado, accion] = useActionState(registrarse, estadoInicial)
 
   return (
     <form action={accion} className="space-y-5">
+      {volver && <input type="hidden" name="volver" value={volver} />}
+
       <Campo
         id="nombreCompleto"
         etiqueta="Nombre y apellido"

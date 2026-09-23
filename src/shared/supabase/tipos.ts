@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
   graphql_public: {
     Tables: {
       [_ in never]: never
@@ -940,6 +945,73 @@ export type Database = {
           },
         ]
       }
+      invitaciones: {
+        Row: {
+          aceptada_en: string | null
+          aceptada_por: string | null
+          creada_por: string | null
+          created_at: string
+          email: string | null
+          escuela_id: string
+          expira_en: string
+          id: string
+          revocada_en: string | null
+          rol: Database["public"]["Enums"]["rol_escuela"]
+          token_hash: string
+          updated_at: string
+        }
+        Insert: {
+          aceptada_en?: string | null
+          aceptada_por?: string | null
+          creada_por?: string | null
+          created_at?: string
+          email?: string | null
+          escuela_id: string
+          expira_en?: string
+          id?: string
+          revocada_en?: string | null
+          rol: Database["public"]["Enums"]["rol_escuela"]
+          token_hash: string
+          updated_at?: string
+        }
+        Update: {
+          aceptada_en?: string | null
+          aceptada_por?: string | null
+          creada_por?: string | null
+          created_at?: string
+          email?: string | null
+          escuela_id?: string
+          expira_en?: string
+          id?: string
+          revocada_en?: string | null
+          rol?: Database["public"]["Enums"]["rol_escuela"]
+          token_hash?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitaciones_aceptada_por_fkey"
+            columns: ["aceptada_por"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitaciones_creada_por_fkey"
+            columns: ["creada_por"]
+            isOneToOne: false
+            referencedRelation: "perfiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitaciones_escuela_id_fkey"
+            columns: ["escuela_id"]
+            isOneToOne: false
+            referencedRelation: "escuelas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       membresias: {
         Row: {
           activa: boolean
@@ -1186,6 +1258,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      aceptar_invitacion: { Args: { p_token: string }; Returns: string }
       activar_anio: { Args: { p_anio: string }; Returns: undefined }
       crear_escuela: {
         Args: {
@@ -1202,6 +1275,17 @@ export type Database = {
       materializar_plantilla: {
         Args: { p_anio: string; p_plantilla: Json }
         Returns: undefined
+      }
+      ver_invitacion: {
+        Args: { p_token: string }
+        Returns: {
+          correo_coincide: boolean
+          escuela_nombre: string
+          escuela_slug: string
+          estado: string
+          requiere_correo: boolean
+          rol: Database["public"]["Enums"]["rol_escuela"]
+        }[]
       }
     }
     Enums: {
@@ -1238,12 +1322,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1267,11 +1351,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1292,11 +1376,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1317,11 +1401,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1334,11 +1418,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -1376,4 +1460,3 @@ export const Constants = {
     },
   },
 } as const
-

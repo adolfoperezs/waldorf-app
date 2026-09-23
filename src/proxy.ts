@@ -18,7 +18,7 @@ import type { Database } from '@/shared/supabase/tipos'
  */
 
 /** Rutas accesibles sin sesion iniciada. */
-const PUBLICAS = ['/', '/login', '/signup', '/auth']
+const PUBLICAS = ['/', '/login', '/signup', '/auth', '/invitacion']
 
 function esPublica(ruta: string) {
   return PUBLICAS.some((p) => ruta === p || ruta.startsWith(`${p}/`))

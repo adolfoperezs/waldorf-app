@@ -20,6 +20,8 @@
   triggers en SELECT. Como se auditan las lecturas de niveles Menor y Sensible.
 - [configuracion-pedagogica-como-dato](project/configuracion-pedagogica-como-dato.md) -
   Si sientes ganas de escribir un enum con vocabulario pedagogico, es una tabla.
+- [invitaciones-por-enlace](project/invitaciones-por-enlace.md) - Enlace por WhatsApp,
+  huella SHA-256, un solo uso. El correo solo protege si "Confirm email" esta activo.
 - [stack-y-diseno](project/stack-y-diseno.md) - Tailwind v4 (la plantilla venia rota),
   estetica Waldorf, proxy.ts, movil primero.
 

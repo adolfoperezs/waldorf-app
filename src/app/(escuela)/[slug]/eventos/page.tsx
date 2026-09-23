@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { ContextoEscuela } from '@/features/ritmo/actions/contexto'
 import { crearEvento } from '@/features/ritmo/actions/evento'
-import { CopiarParaWhatsapp } from '@/features/ritmo/components/copiar-para-whatsapp'
+import { CopiarParaWhatsapp } from '@/shared/ui/copiar-para-whatsapp'
 import { FormularioEvento } from '@/features/ritmo/components/formulario-evento'
 import { formatearInstante } from '@/features/ritmo/lib/fechas'
 import { textoSemana } from '@/features/ritmo/lib/exportar-whatsapp'

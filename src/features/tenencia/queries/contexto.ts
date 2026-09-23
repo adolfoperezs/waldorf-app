@@ -16,6 +16,8 @@ export type ContextoDeEscuela = {
   escuela: Escuela
   roles: Rol[]
   esGestor: boolean
+  /** Solo administracion invita y gestiona miembros (membresias_admin). */
+  esAdministracion: boolean
 }
 
 export async function cargarEscuela(slug: string): Promise<ContextoDeEscuela> {
@@ -27,5 +29,7 @@ export async function cargarEscuela(slug: string): Promise<ContextoDeEscuela> {
     (rol) => rol === 'administracion' || rol === 'colegio_maestros',
   )
 
-  return { escuela, roles, esGestor }
+  const esAdministracion = roles.includes('administracion')
+
+  return { escuela, roles, esGestor, esAdministracion }
 }

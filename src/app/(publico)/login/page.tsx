@@ -7,6 +7,7 @@ export default async function PaginaLogin({
   searchParams: Promise<{ volver?: string }>
 }) {
   const { volver } = await searchParams
+  const conVolver = volver ? `?volver=${encodeURIComponent(volver)}` : ''
 
   return (
     <div className="space-y-6">
@@ -16,7 +17,7 @@ export default async function PaginaLogin({
 
       <p className="text-sm text-texto-suave">
         Todavia no tienes cuenta?{' '}
-        <Link href="/signup" className="text-acento underline">
+        <Link href={`/signup${conVolver}`} className="text-acento underline">
           Crear una
         </Link>
       </p>

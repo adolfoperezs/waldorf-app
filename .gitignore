@@ -78,3 +78,6 @@ supabase/.branches
 /playwright-report/
 /blob-report/
 /.playwright/
+
+# Cache del compilador de TypeScript
+*.tsbuildinfo

@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import type { ContextoEscuela } from '@/features/ritmo/actions/contexto'
 import { alternarInscripcion, marcarAsistencia } from '@/features/ritmo/actions/evento'
-import { CopiarParaWhatsapp } from '@/features/ritmo/components/copiar-para-whatsapp'
+import { CopiarParaWhatsapp } from '@/shared/ui/copiar-para-whatsapp'
 import { formatearInstante } from '@/features/ritmo/lib/fechas'
 import { textoEvento } from '@/features/ritmo/lib/exportar-whatsapp'
 import { eventoPorId, inscripcionesDeEvento } from '@/features/ritmo/queries/ritmo'

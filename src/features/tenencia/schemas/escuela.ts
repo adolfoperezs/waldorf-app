@@ -10,6 +10,9 @@ import { z } from 'zod'
  * manda; esto existe para dar un mensaje humano antes de llegar a Postgres.
  */
 
+/** Rutas del sistema que viven en la raiz, al mismo nivel que `/[slug]`. */
+const SLUGS_RESERVADOS = ['login', 'signup', 'nueva-escuela', 'invitacion', 'auth', 'api']
+
 /** Mismo patron que el CHECK de `escuelas.slug`. */
 export const slugEscuela = z
   .string()
@@ -20,6 +23,11 @@ export const slugEscuela = z
   .regex(
     /^[a-z0-9]+(-[a-z0-9]+)*$/,
     'Solo minusculas, numeros y guiones simples entre palabras',
+  )
+  // Una escuela llamada "login" quedaria tapada por la pagina de login.
+  .refine(
+    (slug) => !SLUGS_RESERVADOS.includes(slug),
+    'Ese identificador esta reservado. Elige otro.',
   )
 
 const zonaHoraria = z

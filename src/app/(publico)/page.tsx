@@ -58,6 +58,12 @@ export default async function Inicio() {
         </ul>
       )}
 
+      {escuelas.length === 0 && (
+        <p className="text-texto-suave">
+          Si una escuela te invito, abre el enlace que te mandaron.
+        </p>
+      )}
+
       <Link href="/nueva-escuela">
         <Boton variante="suave">Crear una escuela</Boton>
       </Link>

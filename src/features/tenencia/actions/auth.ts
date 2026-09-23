@@ -80,7 +80,8 @@ export async function registrarse(
   }
 
   revalidatePath('/', 'layout')
-  redirect('/')
+  // Quien llega desde una invitacion vuelve a ella tras registrarse.
+  redirect(destinoSeguro(formData.get('volver')))
 }
 
 export async function cerrarSesion() {

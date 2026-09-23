@@ -19,7 +19,7 @@ export default async function LayoutEscuela({
   params: Promise<{ slug: string }>
 }) {
   const { slug } = await params
-  const { escuela, esGestor } = await cargarEscuela(slug)
+  const { escuela, esGestor, esAdministracion } = await cargarEscuela(slug)
   const escuelas = await misEscuelas()
 
   const enlaces = [
@@ -30,6 +30,9 @@ export default async function LayoutEscuela({
           { href: `/${escuela.slug}/epocas`, texto: 'Epocas' },
           { href: `/${escuela.slug}/anios`, texto: 'Anios' },
         ]
+      : []),
+    ...(esAdministracion
+      ? [{ href: `/${escuela.slug}/miembros`, texto: 'Miembros' }]
       : []),
   ]
 
