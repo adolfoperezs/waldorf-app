@@ -34,3 +34,10 @@ el enlace de invitacion y nombres de ninos (docs/PRIVACY.md: nada personal en UR
 
 Se implemento sin PRP ni pruebas locales, por decision explicita del usuario (probar
 directo en produccion). No hay test automatizado de este flujo todavia.
+
+**Correo (2026-09-23):** recuperar contrasena existe (`/recuperar` → correo →
+`/auth/confirmar` → `/nueva-contrasena`). Mientras no haya SMTP propio, Supabase solo
+entrega a los correos del equipo del proyecto, 2 por hora, y NO deja cambiar las
+plantillas en el plan gratis: el enlace de fabrica trae un `code` PKCE que solo sirve en
+el mismo navegador. Las plantillas en espanol con `token_hash` estan en
+`supabase/plantillas-correo/` listas para aplicar. Pasos en docs/SETUP.md, seccion 6.

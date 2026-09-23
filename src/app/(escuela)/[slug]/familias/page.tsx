@@ -43,7 +43,6 @@ export default async function PaginaFamilias({
   ])
 
   const grupoPorId = new Map(grupos.map((g) => [g.id, g]))
-  const ahora = Date.now()
 
   return (
     <div className="space-y-10">
@@ -140,7 +139,7 @@ export default async function PaginaFamilias({
                     )}
 
                     {pendientes.map((inv) => {
-                      const caducada = new Date(inv.expira_en).getTime() <= ahora
+                      const { caducada } = inv
                       return (
                         <div
                           key={inv.id}

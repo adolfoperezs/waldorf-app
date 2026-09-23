@@ -4,7 +4,7 @@ import { useActionState } from 'react'
 import { useFormStatus } from 'react-dom'
 import { Boton } from '@/shared/ui/boton'
 import { Campo } from '@/shared/ui/campo'
-import { registrarse } from '../actions/auth'
+import { registrarse, type EstadoRegistro } from '../actions/auth'
 import { estadoInicial } from '@/shared/lib/formulario'
 
 function BotonEnviar() {
@@ -17,7 +17,20 @@ function BotonEnviar() {
 }
 
 export function FormularioRegistro({ volver }: { volver?: string }) {
-  const [estado, accion] = useActionState(registrarse, estadoInicial)
+  const [estado, accion] = useActionState(registrarse, estadoInicial as EstadoRegistro)
+
+  if (estado.porConfirmar) {
+    return (
+      <div role="status" className="space-y-2 rounded-organico border border-borde bg-superficie p-5">
+        <p className="font-titulo text-lg text-primario-oscuro">Revisa tu correo</p>
+        <p className="text-sm text-texto-suave">
+          Te enviamos un enlace para confirmar tu cuenta. Al abrirlo entras
+          directamente{volver ? ' y vuelves a donde ibas' : ''}. Si no aparece,
+          mira en spam.
+        </p>
+      </div>
+    )
+  }
 
   return (
     <form action={accion} className="space-y-5">

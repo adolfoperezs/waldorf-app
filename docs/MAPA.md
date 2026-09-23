@@ -170,19 +170,26 @@ Leído de las políticas de seguridad aplicadas hoy en producción.
 | Comisiones y sus integrantes | ✏️ | ✏️ | 👁️ | 👁️ |
 | Campañas | ✏️ | ✏️ | 👁️ ¹ | 👁️ ¹ |
 | Miembros de la escuela | ✏️ | 👁️ | 🔸 | 🔸 |
+| Nombres de otras personas | 👁️ | 👁️ | — | 🔸 su familia |
+| Correo y teléfono de otras personas | 👁️ ⁴ | — | — | — |
 | Invitaciones | ✏️ | — | — | — |
-| Familias | ✏️ | 👁️ ² | — | 🔸 |
-| Niños | ✏️ | 👁️ ² | 🔸 de su grupo | 🔸 sus hijos ³ |
+| Familias | ✏️ | — | — | 🔸 |
+| Niños | ✏️ | — | 🔸 de su grupo ² | 🔸 sus hijos ³ |
 | Tramos de aporte | ✏️ | 👁️ | 👁️ | 👁️ |
 | Acuerdos y aportes | ✏️ | — | — | 🔸 |
 | Auditoría | 👁️ | — | — | — |
 
 1. Quien integra una comisión puede además gestionar las campañas de **esa** comisión. Lo
    da la relación `comision_miembros`, no el rol.
-2. Ver la sección 7: esto no calza con `PRIVACY.md`.
+2. La maestra ve que la fila existe (el identificador), no el nombre ni la fecha de
+   nacimiento: esas columnas no se leen por la API desde 0008. Cuando las necesite
+   (Fase 4) será por una función que deje la lectura en la auditoría.
 3. La aplicación no lee `ninos` directo: pasa por `ninos_de_mi_familia` (solo los hijos de
    quien pregunta) y `ninos_de_escuela` (todos, solo administración). Las dos dejan cada
-   lectura en la auditoría, como exige el nivel Menor.
+   lectura en la auditoría, como exige el nivel Menor. Desde 0008 no hay otro camino:
+   las columnas con datos del niño no son legibles por la API.
+4. Por `contactos_de_escuela`, que solo responde a administración. Las columnas `email`
+   y `telefono` de `perfiles` no son legibles por la API, ni siquiera las propias.
 
 Además, **cualquier persona con cuenta puede crear una escuela nueva**, y queda como su
 administración. Es el único punto del sistema que se salta la RLS, a propósito.
@@ -352,17 +359,19 @@ del curso: no enviamos notificaciones, integramos con lo que la comunidad ya usa
 
 ## 7. Discrepancias detectadas al hacer este mapa
 
-Cosas que el sistema hace hoy y que no calzan con `PRIVACY.md`. No están corregidas.
+Cosas que el sistema hacía y que no calzaban con `PRIVACY.md`. **Corregidas en
+`0008_privacidad.sql` (2026-09-23)**; se dejan aquí como registro.
 
 | # | Qué pasa hoy | Qué dice `PRIVACY.md` |
 |---|---|---|
 | P1 | El **colegio de maestros ve todas las familias y todos los niños** de la escuela, porque las políticas usan `es_gestor`, que incluye al colegio. | Niños (nivel Menor): administración, maestro **del grupo** y su familia. Familias (nivel Personal): administración y el propio titular. |
 | P2 | **Cualquier miembro puede leer nombre, correo y teléfono de todos los demás miembros** de su escuela (`perfiles_select_companeros`). Una familia puede ver el teléfono de otra. | Datos personales: administración y el propio titular. |
 
-Ninguna de las dos se ve hoy en pantalla —la página de Familias es solo de administración,
-y la aplicación lee niños únicamente por las funciones auditadas—, pero sí son accesibles a
-través de la API con una sesión válida. Conviene corregirlas antes de cargar datos reales de
-familias.
+Cómo se corrigieron: P1 cambiando las políticas de `familias`, `familia_miembros` y
+`ninos` de `es_gestor` a administración; P2 limitando qué perfiles ve cada quien y, además,
+con **privilegios por columna**: la RLS decide qué filas, la columna decide qué datos de
+esas filas. De paso, una familia a la que se le quita la membresía deja de ver a sus hijos
+aunque siga en `familia_miembros`. Verificación: `supabase/verificacion/privacidad.sql`.
 
 ---
 

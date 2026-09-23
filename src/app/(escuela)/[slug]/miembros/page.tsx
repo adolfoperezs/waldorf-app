@@ -9,6 +9,7 @@ import { FormularioInvitacion } from '@/features/tenencia/components/formulario-
 import { NOMBRE_ROL } from '@/features/tenencia/lib/roles'
 import { cargarEscuela } from '@/features/tenencia/queries/contexto'
 import {
+  contactosDeEscuela,
   invitacionesPendientes,
   miembrosDeEscuela,
 } from '@/features/tenencia/queries/miembros'
@@ -35,12 +36,14 @@ export default async function PaginaMiembros({
   const supabase = await crearClienteServidor()
   const [
     miembros,
+    contactos,
     pendientes,
     {
       data: { user },
     },
   ] = await Promise.all([
     miembrosDeEscuela(escuela.id),
+    contactosDeEscuela(escuela.id),
     invitacionesPendientes(escuela.id),
     supabase.auth.getUser(),
   ])
@@ -53,14 +56,12 @@ export default async function PaginaMiembros({
   for (const m of miembros) {
     const persona = personas.get(m.perfil_id) ?? {
       nombre: m.perfiles?.nombre_completo ?? 'Sin nombre',
-      email: m.perfiles?.email ?? null,
+      email: contactos.get(m.perfil_id)?.email ?? null,
       roles: [],
     }
     persona.roles.push({ id: m.id, rol: m.rol })
     personas.set(m.perfil_id, persona)
   }
-
-  const ahora = Date.now()
 
   return (
     <div className="space-y-10">
@@ -91,7 +92,7 @@ export default async function PaginaMiembros({
           <h2 className="font-titulo text-xl">Invitaciones sin aceptar</h2>
           <ul className="space-y-3">
             {pendientes.map((inv) => {
-              const caducada = new Date(inv.expira_en).getTime() <= ahora
+              const { caducada } = inv
               return (
                 <li key={inv.id}>
                   <Tarjeta className="flex flex-wrap items-center justify-between gap-4">

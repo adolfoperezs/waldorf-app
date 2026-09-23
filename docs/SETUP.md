@@ -90,6 +90,28 @@ No implementes nada: quiero revisar el PRP primero.
 A partir de ahí, el ciclo es siempre el mismo: PRP → revisión humana → migración →
 tipos → server actions → UI → registro de la decisión en memoria.
 
+## 6. Correo propio (SMTP)
+
+Sin esto, Supabase envía los correos (recuperar contraseña, confirmar cuenta) desde su
+servidor de prueba, que tiene tres límites:
+
+- **Solo entrega a los correos del equipo del proyecto en Supabase.** Una familia que
+  pide recuperar su contraseña no recibe nada.
+- Dos correos por hora para todo el proyecto.
+- No deja cambiar las plantillas: salen en inglés, y el enlace solo funciona si se abre
+  en el mismo navegador donde se pidió.
+
+Pasos cuando haya un dominio (o una cuenta de correo para la escuela):
+
+1. Crear una cuenta en un proveedor de correo transaccional (Resend, Brevo, Postmark...)
+   y verificar el dominio con los registros DNS que indique.
+2. En Supabase → Authentication → SMTP Settings, cargar host, puerto, usuario y clave
+   del proveedor. La clave la escribe una persona en el panel, nunca va al repositorio.
+3. Aplicar las plantillas en español: `node supabase/plantillas-correo/aplicar.mjs`
+   (con `SUPABASE_ACCESS_TOKEN` en el entorno).
+4. Recién ahí activar "Confirm email" (`mailer_autoconfirm = false`). Con eso el correo
+   de una invitación queda verificado y la protección por correo se vuelve real.
+
 ## Una advertencia
 
 No corras Claude Code con permisos amplios sobre este repositorio sin revisar qué hace.

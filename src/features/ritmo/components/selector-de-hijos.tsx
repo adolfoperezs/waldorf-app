@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useId, useRef, useState } from 'react'
+import { useId, useRef, useState, useSyncExternalStore } from 'react'
 import { IconoCiclo } from '@/features/comunidad/components/chip-ciclo'
 import { clasesAcento } from '@/shared/design/acentos'
 import { cn } from '@/shared/lib/utils'
@@ -13,6 +13,28 @@ export type HijoEnSelector = {
   acento: string | null
   /** La vista del ritmo de este hijo, ya renderizada en el servidor. */
   panel: React.ReactNode
+}
+
+// Lo recordado se lee como un almacen externo (useSyncExternalStore) y no
+// con un efecto: en el servidor no hay localStorage, asi que el primer
+// dibujo usa el primer hijo y el navegador corrige sin un render de mas.
+const EVENTO = 'waldorf:hijo'
+
+function suscribir(avisar: () => void) {
+  window.addEventListener('storage', avisar)
+  window.addEventListener(EVENTO, avisar)
+  return () => {
+    window.removeEventListener('storage', avisar)
+    window.removeEventListener(EVENTO, avisar)
+  }
+}
+
+function leer(llave: string): string | null {
+  try {
+    return window.localStorage.getItem(llave)
+  } catch {
+    return null // Navegacion privada o almacenamiento bloqueado.
+  }
 }
 
 /**
@@ -34,26 +56,27 @@ export function SelectorDeHijos({
   /** Distingue lo recordado por escuela. */
   clave: string
 }) {
-  const [activo, setActivo] = useState(hijos[0]?.id)
   const base = useId()
   const pestanas = useRef<(HTMLButtonElement | null)[]>([])
   const llave = `waldorf:hijo:${clave}`
 
-  useEffect(() => {
-    try {
-      const recordado = window.localStorage.getItem(llave)
-      if (recordado && hijos.some((h) => h.id === recordado)) setActivo(recordado)
-    } catch {
-      // Navegacion privada o almacenamiento bloqueado: se queda el primero.
-    }
-  }, [llave, hijos])
+  const recordado = useSyncExternalStore(
+    suscribir,
+    () => leer(llave),
+    () => null,
+  )
+  const [elegido, setElegido] = useState<string | null>(null)
+
+  const existe = (id: string | null) => id !== null && hijos.some((h) => h.id === id)
+  const activo = existe(elegido) ? elegido : existe(recordado) ? recordado : hijos[0]?.id
 
   function elegir(id: string) {
-    setActivo(id)
+    setElegido(id)
     try {
       window.localStorage.setItem(llave, id)
+      window.dispatchEvent(new Event(EVENTO))
     } catch {
-      // Sin almacenamiento, el cambio igual funciona.
+      // Sin almacenamiento, el cambio igual funciona en esta visita.
     }
   }
 

@@ -1433,6 +1433,14 @@ export type Database = {
     Functions: {
       aceptar_invitacion: { Args: { p_token: string }; Returns: string }
       activar_anio: { Args: { p_anio: string }; Returns: undefined }
+      contactos_de_escuela: {
+        Args: { p_escuela: string }
+        Returns: {
+          email: string
+          perfil_id: string
+          telefono: string
+        }[]
+      }
       crear_escuela: {
         Args: {
           p_hemisferio?: string

@@ -47,7 +47,8 @@ Sin test de aislamiento que cubra las tablas nuevas, la feature **no esta termin
 ## Ensayar una migracion contra produccion sin tocarla
 
 Sin Docker a mano (el usuario prefiere no probar local), se ensaya asi: la migracion +
-`supabase/verificacion/ritmo-por-nino.sql` en UNA consulta a la API de administracion
+los archivos de `supabase/verificacion/` que apliquen (`ritmo-por-nino.sql`,
+`privacidad.sql`: se concatenan sus cuerpos, sin sus begin/rollback) en UNA consulta a la API de administracion
 (`POST /v1/projects/{ref}/database/query`), envuelta en `begin ... rollback`. El archivo
 de verificacion no usa metacomandos de psql: cada prueba es un `do $$` que lanza
 `FALLO: ...`, asi que un 201 es "todo paso" y un 400 trae la prueba que fallo. Despues

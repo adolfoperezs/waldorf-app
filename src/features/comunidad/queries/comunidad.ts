@@ -150,7 +150,11 @@ export async function invitacionesDeFamilias(escuelaId: string) {
     .is('aceptada_en', null)
     .is('revocada_en', null)
     .order('created_at', { ascending: false })
-  return data ?? []
+  const ahora = Date.now()
+  return (data ?? []).map((inv) => ({
+    ...inv,
+    caducada: new Date(inv.expira_en).getTime() <= ahora,
+  }))
 }
 
 /** Todos los ninos de la escuela. Solo devuelve filas a administracion. Auditada. */

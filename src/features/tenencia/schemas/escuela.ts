@@ -11,7 +11,16 @@ import { z } from 'zod'
  */
 
 /** Rutas del sistema que viven en la raiz, al mismo nivel que `/[slug]`. */
-const SLUGS_RESERVADOS = ['login', 'signup', 'nueva-escuela', 'invitacion', 'auth', 'api']
+const SLUGS_RESERVADOS = [
+  'login',
+  'signup',
+  'recuperar',
+  'nueva-contrasena',
+  'nueva-escuela',
+  'invitacion',
+  'auth',
+  'api',
+]
 
 /** Mismo patron que el CHECK de `escuelas.slug`. */
 export const slugEscuela = z

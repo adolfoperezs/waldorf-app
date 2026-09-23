@@ -20,7 +20,9 @@ RLS filtran EXPLICITAMENTE y mas estrecho que `ninos_select`: la primera solo lo
 de quien llama, la segunda solo para administracion. Devuelven lo minimo que usa cada
 pantalla. La app no lee `ninos` directo en ningun sitio.
 
-Queda un hueco conocido: la tabla sigue legible por la API con la politica
-`ninos_select` (incluye a colegio_maestros, discrepancia P1 de docs/MAPA.md), y esas
-lecturas directas no se auditan. Cerrarlo es revocar SELECT de la tabla y dejar solo
-las funciones; conviene hacerlo junto con P1.
+**Hueco cerrado en 0008 (2026-09-23):** `revoke select on ninos` y
+`grant select (id, escuela_id, familia_id, grupo_id)`. Los identificadores siguen
+legibles (hacen falta para `UPDATE ... WHERE id =` y para el test de aislamiento);
+nombre, apellidos y fecha de nacimiento solo salen por las funciones auditadas. Una
+funcion nueva que lea ninos para maestras (Fase 4) tiene que seguir el mismo patron:
+definer, filtro explicito, `app.registrar_lectura` por fila.
